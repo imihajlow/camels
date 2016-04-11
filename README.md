@@ -1,0 +1,2 @@
+# camels
+Camels game AI
