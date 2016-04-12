@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 nCamels = 5
-nPlayers = 1
+nPlayers = 4
 nSteps = 10
 
 class State:
@@ -54,7 +54,24 @@ class State:
 	def minusOne(self, x):
 		return State(self._dice, self._camels, self._plusOnes, self._minusOnes | {x})
 
+	def tryPutPlusMunus(self, x, isPlus):
+		if len(self._plusOnes) + len(self._minusOnes) >= nPlayers:
+			return None
+		if any(xa in self._plusOnes or xa in self._minusOnes for xa in [x-1, x, x+1]):
+			return None
+		if any(xc == x for xc,_ in self._camels):
+			return None
+		if isPlus:
+			return self.plusOne(x)
+		else:
+			return self.minusOne(x)
+
+oldCounter = 0
+
 def positions(state, result):
+	global oldCounter
+	if state is None:
+		return 0
 	if not any(state._dice):
 		sortedCamels = sorted(enumerate(state._camels), key=lambda c: c[1][0] * nCamels + c[1][1], reverse=True)
 		sortedCamels = [a for a,b in sortedCamels]
@@ -67,16 +84,18 @@ def positions(state, result):
 		counter = 0
 		for i in (i for i,x in enumerate(state._dice) if x):
 			for value in range(1,7):
+				# just jump
 				counter += positions(state.jump(i, value), result)
-		"""
-		minCamel = min(x for x,y in state._camels)
-		xs = set(x for x,y in state._camels)
-		if len(state._plusOnes) + len(state._minusOnes) < nPlayers:
-			for x in range(minCamel + 1, nSteps):
-				if x not in xs and not any(xa in state._plusOnes or xa in state._minusOnes for xa in [x-1, x, x+1]):
-					counter += positions(state.plusOne(x), result)
-					counter += positions(state.minusOne(x), result)
-		"""
+				# or if +1 or -1 can be put, put it and jump
+				xTo = state._camels[i][0] + value
+				newState = state.tryPutPlusMunus(xTo, True)
+				if newState is not None:
+					counter += positions(newState.jump(i, value), result)
+					newState = state.tryPutPlusMunus(xTo, False)
+					counter += positions(newState.jump(i, value), result)
+		if counter - oldCounter > 100:
+			print("{0:10d}".format(counter), end="\r", flush=True)
+			oldCounter = counter
 		return counter
 
 def test():
@@ -89,10 +108,14 @@ def test():
 	print(s1._camels)
 	assert(s1._camels == [(0,0), (0,1), (2,1), (2,0), (2,2)])
 
+
+
 if __name__ == "__main__":
 	test()
 	result = [[0 for place in range(nCamels)] for camel in range(nCamels)]
-	n = positions(State([True for _ in range(nCamels)], [(0,0),(0,1),(1,0),(1,1),(2,0)], set([]), set([3])), result)
+	oldCounter = 0
+	n = positions(State([True for _ in range(nCamels)], [(0,0),(1,0),(2,0),(3,0),(4,0)], set([]), set([])), result)
 	result = [[a/n for a in x] for x in result]
+	print("{0} combinations".format(n))
 	for i,l in enumerate(result):
 		print("camel {0}: [{1}]".format(i+1, ", ".join("{0:.3f}".format(x) for x in l)))
