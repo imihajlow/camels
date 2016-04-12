@@ -1,2 +1,2 @@
 # camels
-Camels game AI
+Camel Up game AI
