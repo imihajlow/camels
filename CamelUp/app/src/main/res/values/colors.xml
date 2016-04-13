@@ -3,4 +3,9 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorCamel0">#cc0011</color>
+    <color name="colorCamel1">#0000bb</color>
+    <color name="colorCamel2">#aaaaaa</color>
+    <color name="colorCamel3">#ff9900</color>
+    <color name="colorCamel4">#33bb00</color>
 </resources>

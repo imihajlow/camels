@@ -1,0 +1,279 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="tk.imihajlov.camelup.GameFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView"
+        android:layout_gravity="center_horizontal|top" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|top">
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/dice_state"
+                android:id="@+id/textView"
+                android:layout_gravity="center_horizontal" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="left">
+
+            </LinearLayout>
+
+            <TableLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/checkBoxDice0" />
+
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/checkBoxDice1" />
+
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/checkBoxDice2" />
+
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/checkBoxDice3" />
+
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/checkBoxDice4" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView"
+                        android:src="@color/colorCamel0" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView2"
+                        android:src="@color/colorCamel1" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView3"
+                        android:src="@color/colorCamel2" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView4"
+                        android:src="@color/colorCamel3" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView5"
+                        android:src="@color/colorCamel4" />
+                </TableRow>
+            </TableLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/camels_state"
+                android:id="@+id/textView2"
+                android:layout_gravity="center_horizontal" />
+
+            <TableLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <Space
+                        android:layout_width="20px"
+                        android:layout_height="20px" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView6"
+                        android:src="@color/colorCamel0" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView7"
+                        android:src="@color/colorCamel1" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView8"
+                        android:src="@color/colorCamel2" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView9"
+                        android:src="@color/colorCamel3" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="10dp"
+                        android:id="@+id/imageView10"
+                        android:src="@color/colorCamel4" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Y"
+                        android:id="@+id/textView3" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelY0" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelY1" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelY2" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelY3" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelY4" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="X"
+                        android:id="@+id/textView4" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelX0" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelX1" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelX2" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelX3" />
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="2"
+                        android:id="@+id/editCamelX4" />
+                </TableRow>
+            </TableLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/plusminux"
+                android:id="@+id/textView5"
+                android:layout_gravity="center_horizontal" />
+        </LinearLayout>
+    </ScrollView>
+
+</FrameLayout>
