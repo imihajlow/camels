@@ -109,7 +109,7 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
                 case 0:
                     return "Game setup";
                 case 1:
-                    return "SECTION 2";
+                    return "";
                 case 2:
                     return "SECTION 3";
             }

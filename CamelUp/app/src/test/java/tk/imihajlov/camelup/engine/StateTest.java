@@ -1,0 +1,93 @@
+package tk.imihajlov.camelup.engine;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class StateTest {
+
+    private State createState() {
+        Settings settings = new Settings();
+        CamelPosition[] camels = new CamelPosition[] {
+                new CamelPosition(1, 1),
+                new CamelPosition(1, 0),
+                new CamelPosition(0, 0),
+                new CamelPosition(2, 0),
+                new CamelPosition(0, 1)
+        };
+        return State.createOnLegBegin(settings, camels);
+    }
+
+    @Test
+    public void testAreDiceLeft() throws Exception {
+        State state = createState();
+        assertEquals(true, state.areDiceLeft());
+        state = state.jump(0, 2).jump(1,1).jump(2, 3).jump(3, 1).jump(4, 2);
+        assertEquals(false, state.areDiceLeft());
+    }
+
+    @Test
+    public void testListCamelsByPosition() throws Exception {
+        State state = createState();
+        int[] camels = state.listCamelsByPosition();
+        assertArrayEquals(new int[] {3,0,1,4,2}, camels);
+    }
+
+    @Test
+    public void testPutOasis() throws Exception {
+        State state = createState();
+        assertEquals(0, state.getOasises().length);
+        assertEquals(null, state.putOasis(2));
+        state = state.putOasis(3);
+        assertNotEquals(null, state);
+        assertArrayEquals(new int[] {3}, state.getOasises());
+        assertEquals(null, state.putOasis(4));
+    }
+
+    @Test
+    public void testPutMirage() throws Exception {
+
+    }
+
+    @Test
+    public void testJump() throws Exception {
+        State state = createState();
+        // Jump single camel
+        State newState = state.jump(0, 2);
+        assertNotEquals(null, newState);
+        assertEquals(new CamelPosition(3,0), newState.getCamelPosition(0));
+        assertEquals(new CamelPosition(1,0), newState.getCamelPosition(1));
+        assertEquals(new CamelPosition(0,0), newState.getCamelPosition(2));
+        assertEquals(new CamelPosition(2,0), newState.getCamelPosition(3));
+        assertEquals(new CamelPosition(0,1), newState.getCamelPosition(4));
+        // Jump two camels onto one
+        State two = newState.jump(2, 1);
+        assertNotEquals(null, two);
+        assertEquals(new CamelPosition(3,0), two.getCamelPosition(0));
+        assertEquals(new CamelPosition(1,0), two.getCamelPosition(1));
+        assertEquals(new CamelPosition(1,1), two.getCamelPosition(2));
+        assertEquals(new CamelPosition(2,0), two.getCamelPosition(3));
+        assertEquals(new CamelPosition(1,2), two.getCamelPosition(4));
+        // Jump over oasis
+        State oasis = two.putOasis(4);
+        assertNotEquals(null, oasis);
+        State over = oasis.jump(3, 2);
+        assertNotEquals(null, over);
+        assertEquals(new CamelPosition(3,0), over.getCamelPosition(0));
+        assertEquals(new CamelPosition(1,0), over.getCamelPosition(1));
+        assertEquals(new CamelPosition(1,1), over.getCamelPosition(2));
+        assertEquals(new CamelPosition(5,0), over.getCamelPosition(3));
+        assertEquals(new CamelPosition(1,2), over.getCamelPosition(4));
+
+        // Jump over mirage
+        State mirage = state.putMirage(3);
+        assertNotEquals(null, mirage);
+        State under = mirage.jump(1, 2);
+        assertNotEquals(null, under);
+        assertEquals(new CamelPosition(2,1), under.getCamelPosition(0));
+        assertEquals(new CamelPosition(2,0), under.getCamelPosition(1));
+        assertEquals(new CamelPosition(0,0), under.getCamelPosition(2));
+        assertEquals(new CamelPosition(2,2), under.getCamelPosition(3));
+        assertEquals(new CamelPosition(0,1), under.getCamelPosition(4));
+    }
+}
