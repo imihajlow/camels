@@ -42,7 +42,7 @@ public class ResultsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param state game state
+     * @param result leg result
      * @return A new instance of fragment ResultsFragment.
      */
     public static ResultsFragment newInstance(LegResult result) {
