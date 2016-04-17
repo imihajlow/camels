@@ -43,7 +43,7 @@ public class Engine {
     private boolean stateModified = true;
     private Result result;
 
-    private class Result implements LegResult, Runnable {
+    private class Result implements Runnable {
 
         public Result(Settings settings, State state, ResultListener listener) {
             this.settings = settings;
@@ -51,59 +51,134 @@ public class Engine {
             this.listener = listener;
         }
 
-        @Override
-        public double[][] getProbabilityMatrix() {
-            return result;
+        private class ResultAccumulator implements LegResult {
+            private double[][] result;
+            private double[] wins;
+            private double[] looses;
+            private double[] absoluteWins;
+            private double[] absoulteLooses;
+
+            private int nResults;
+            private int nFinals;
+
+            @Override
+            public double[][] getProbabilityMatrix() {
+                return result;
+            }
+
+            @Override
+            public double[] getWinProbability() {
+                return wins;
+            }
+
+            @Override
+            public double[] getLooseProbability() {
+                return looses;
+            }
+
+            @Override
+            public double[] getAbsoluteWinProbability() {
+                return absoluteWins;
+            }
+
+            @Override
+            public double[] getAbsoluteLooseProbability() {
+                return absoulteLooses;
+            }
+
+            public ResultAccumulator(int nCamels) {
+                reset(nCamels);
+            }
+
+            public void reset(int nCamels) {
+                result = new double[nCamels][nCamels];
+                wins = new double[nCamels];
+                looses = new double[nCamels];
+                absoluteWins = new double[nCamels];
+                absoulteLooses = new double[nCamels];
+                nResults = 0;
+                nFinals = 0;
+            }
+
+            public void addPositions(int[] positions) {
+                if (nResults == 0) {
+                    reset(result.length);
+                }
+                for (int i = 0; i < positions.length; ++i) {
+                    result[positions[i]][i] += 1;
+                }
+                nResults += 1;
+            }
+
+            public void addFinal(int[] positions) {
+                addPositions(positions);
+                nFinals += 1;
+                wins[positions[0]] += 1;
+                looses[positions[positions.length - 1]] += 1;
+            }
+
+            public void finalize() {
+                if (nResults > 0) {
+                    for (double[] row : result) {
+                        for (int i = 0; i < row.length; ++i) {
+                            row[i] /= nResults;
+                        }
+                    }
+                }
+                assert wins.length == looses.length;
+                if (nFinals > 0) {
+                    for (int i = 0; i < wins.length; ++i) {
+                        absoluteWins[i] = wins[i] / nResults;
+                        absoulteLooses[i] = looses[i] / nResults;
+                        wins[i] /= nFinals;
+                        looses[i] /= nFinals;
+                    }
+                }
+                nResults = 0;
+                nFinals = 0;
+            }
         }
 
         @Override
         public void run() {
-            result = new double[settings.getNCamels()][settings.getNCamels()];
-            int n = positions(state);
-            for (double[] row : result) {
-                for (int i = 0; i < row.length; ++i) {
-                    row[i] /= n;
-                }
-            }
-            listener.onCompleted(this);
+            result = new ResultAccumulator(settings.getNCamels());
+            positions(state);
+            result.finalize();
+            listener.onCompleted(result);
         }
 
-        private int positions(State state) {
+        private void positions(State state) {
             if (state == null) {
-                return 0;
+                return;
             }
-            if (!state.areDiceLeft()) {
-                int[] camels = state.listCamelsByPosition();
-                for (int i = 0; i < camels.length; ++i) {
-                    result[camels[i]][i] += 1;
-                }
-                return 1;
+            if (state.isGameEnd()) {
+                result.addFinal(state.listCamelsByPosition());
+            } else if (!state.areDiceLeft()) {
+                result.addPositions(state.listCamelsByPosition());
             } else {
                 boolean[] dice = state.getDice();
-                int counter = 0;
                 for (int i = 0; i < dice.length; ++i) {
                     if (dice[i]) {
                         for (int v = 1; v <= settings.maxDieValue; ++v) {
                             // Just jump
-                            counter += positions(state.jump(i, v));
+                            positions(state.jump(i, v));
                             // Or if +1 or -1 can be put, put it and jump
                             int xTo = state.getCamelPosition(i).getX() + v;
                             State newState = state.putMirage(xTo);
                             if (newState != null) {
-                                counter += positions(newState.jump(i, v));
+                                positions(newState.jump(i, v));
                                 newState = state.putOasis(xTo);
-                                counter += positions(newState.jump(i, v));
+                                positions(newState.jump(i, v));
                             }
                         }
                     }
                 }
-                return counter;
             }
         }
 
         private Settings settings;
         private State state;
-        private double[][] result;
         private ResultListener listener;
+        private ResultAccumulator result;
     }
 }

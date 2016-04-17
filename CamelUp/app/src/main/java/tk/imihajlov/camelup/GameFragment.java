@@ -155,6 +155,9 @@ public class GameFragment extends Fragment {
     }
 
     private View updateViewWithCurrentState(View view) {
+        if (mGameState.isGameEnd()) {
+            return view; // TODO what?
+        }
         ((CheckBox) view.findViewById(R.id.checkBoxDice0)).setChecked(mGameState.getDice()[0]);
         ((CheckBox) view.findViewById(R.id.checkBoxDice1)).setChecked(mGameState.getDice()[1]);
         ((CheckBox) view.findViewById(R.id.checkBoxDice2)).setChecked(mGameState.getDice()[2]);

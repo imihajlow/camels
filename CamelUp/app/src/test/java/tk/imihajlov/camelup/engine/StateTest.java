@@ -95,6 +95,23 @@ public class StateTest {
         assertEquals(new CamelPosition(0,0), under.getCamelPosition(2));
         assertEquals(new CamelPosition(2,2), under.getCamelPosition(3));
         assertEquals(new CamelPosition(0,1), under.getCamelPosition(4));
+
+        // Finish game
+        state = State.createOnLegBegin(new Settings(3,3,10), new CamelPosition[] {
+                new CamelPosition(8,0),
+                new CamelPosition(9,0),
+                new CamelPosition(9,1)
+        });
+        assertNotEquals(null, state);
+        State finish = state.jump(0, 2);
+        assertNotEquals(null, finish);
+        assertEquals(true, finish.isGameEnd());
+        finish = state.jump(1,1);
+        assertNotEquals(null, finish);
+        assertEquals(true, finish.isGameEnd());
+        assertEquals(new CamelPosition(8,0), finish.getCamelPosition(0));
+        assertEquals(new CamelPosition(10,0), finish.getCamelPosition(1));
+        assertEquals(new CamelPosition(10,1), finish.getCamelPosition(2));
     }
 
     @Test

@@ -21,6 +21,7 @@ public class State implements Serializable {
 
     private Settings settings;
 
+    private boolean gameEnd;
     private boolean[] dice;
     private CamelPosition[] camels;
     private CellState[] cells;
@@ -30,6 +31,18 @@ public class State implements Serializable {
         this.dice = dice.clone();
         this.camels = camels.clone();
         this.cells = cells.clone();
+        this.gameEnd = false;
+    }
+
+    /** State at the endgame.
+     *
+     * @param settings
+     * @param camels final camels positions.
+     */
+    private State(Settings settings, CamelPosition[] camels) {
+        this.settings = settings;
+        this.camels = camels.clone();
+        this.gameEnd = true;
     }
 
     /** Create new state with given camels positions, no +1/-1 and all dice vacant.
@@ -113,7 +126,7 @@ public class State implements Serializable {
     }
 
     public boolean[] getDice() {
-        return dice;
+        return gameEnd ? null : dice;
     }
 
     public Settings getSettings() {
@@ -121,6 +134,9 @@ public class State implements Serializable {
     }
 
     public boolean areDiceLeft() {
+        if (gameEnd) {
+            return false;
+        }
         for (boolean d : dice) {
             if (d) {
                 return true;
@@ -185,7 +201,8 @@ public class State implements Serializable {
      * @return new State with camels moved and die reset.
      */
     public State jump(int camel, int steps) {
-        if (camel < 0
+        if (gameEnd
+                || camel < 0
                 || camel >= settings.getNCamels()
                 || steps < 1
                 || steps > settings.maxDieValue) {
@@ -196,14 +213,18 @@ public class State implements Serializable {
 
         CamelPosition from = camels[camel];
         int xTo = from.getX() + steps;
+        boolean under;
+        boolean finish = false;
         if (xTo >= settings.getNSteps()) {
-            return null; // TODO finish the game
-        }
-        boolean under = cells[xTo] == CellState.MINUS;
-        if (cells[xTo] == CellState.PLUS) {
-            xTo += 1;
-        } else if (cells[xTo] == CellState.MINUS) {
-            xTo -= 1;
+            under = false;
+            finish = true;
+        } else {
+            under = cells[xTo] == CellState.MINUS;
+            if (cells[xTo] == CellState.PLUS) {
+                xTo += 1;
+            } else if (cells[xTo] == CellState.MINUS) {
+                xTo -= 1;
+            }
         }
         CamelPosition[] newCamels = new CamelPosition[settings.getNCamels()];
         if (!under) {
@@ -243,6 +264,10 @@ public class State implements Serializable {
             }
         }
 
+        if (finish) {
+            return new State(settings, newCamels);
+        }
+
         CellState[] newCells = new CellState[settings.getNSteps()];
         Arrays.fill(newCells, CellState.EMPTY);
         for (CamelPosition p : newCamels) {
@@ -262,11 +287,15 @@ public class State implements Serializable {
     }
 
     public int[] getOasises() {
-        return getCellStates(CellState.PLUS);
+        return gameEnd ? null : getCellStates(CellState.PLUS);
     }
 
     public int[] getMirages() {
-        return getCellStates(CellState.MINUS);
+        return gameEnd ? null : getCellStates(CellState.MINUS);
+    }
+
+    public boolean isGameEnd() {
+        return gameEnd;
     }
 
     private int[] getCellStates(CellState state) {
@@ -281,7 +310,8 @@ public class State implements Serializable {
 
     private State put(int position, CellState state) {
         assert state == CellState.MINUS || state == CellState.PLUS : "put() only accepts PLUS or MINUS";
-        if (position <= 0
+        if (gameEnd
+                || position <= 0
                 || position >= settings.getNSteps()
                 || cells[position] != CellState.EMPTY
                 || cells[position - 1].isPlusOrMinus()

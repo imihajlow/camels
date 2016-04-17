@@ -114,6 +114,18 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
                     sb.append("\n");
                 }
                 Log.v("CamelUp", sb.toString());
+                sb = new StringBuilder();
+                sb.append("Winners: ");
+                for (double x : result.getWinProbability()) {
+                    sb.append(String.format("%.3f, ", x));
+                }
+                Log.v("CamelUp", sb.toString());
+                sb = new StringBuilder();
+                sb.append("Loosers: ");
+                for (double x : result.getLooseProbability()) {
+                    sb.append(String.format("%.3f, ", x));
+                }
+                Log.v("CamelUp", sb.toString());
             }
 
             @Override
