@@ -42,11 +42,17 @@ public class StateTest {
         assertNotEquals(null, state);
         assertArrayEquals(new int[] {3}, state.getOasises());
         assertEquals(null, state.putOasis(4));
-    }
 
-    @Test
-    public void testPutMirage() throws Exception {
-
+        // To many oasises
+        state = createState();
+        state = state.putOasis(9);
+        assertNotEquals(null, state);
+        state = state.putOasis(11);
+        assertNotEquals(null, state);
+        state = state.putOasis(13);
+        assertNotEquals(null, state);
+        state = state.putOasis(15);
+        assertEquals(null, state);
     }
 
     @Test
@@ -89,5 +95,98 @@ public class StateTest {
         assertEquals(new CamelPosition(0,0), under.getCamelPosition(2));
         assertEquals(new CamelPosition(2,2), under.getCamelPosition(3));
         assertEquals(new CamelPosition(0,1), under.getCamelPosition(4));
+    }
+
+    @Test
+    public void testValidateAndCreate() {
+        Settings settings = new Settings();
+
+        // Duplicate camel position
+        assertEquals(null,
+                State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,1)
+                }, new boolean[settings.getNCamels()], new int[] {}, new int[] {}));
+
+        // Floating camel
+        assertEquals(null,
+                State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,0),
+                        new CamelPosition(3,2),
+                        new CamelPosition(1,1)
+                }, new boolean[settings.getNCamels()], new int[] {}, new int[] {}));
+
+        assertEquals(null,
+                State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,0),
+                        new CamelPosition(2,1),
+                        new CamelPosition(1,1)
+                }, new boolean[settings.getNCamels()], new int[] {}, new int[] {}));
+
+        // Oasis under camel
+        assertEquals(null,
+                State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(2,0),
+                        new CamelPosition(1,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,1)
+                }, new boolean[settings.getNCamels()], new int[] {}, new int[] {2}));
+
+        // Mirage close to oasis
+        assertEquals(null,
+                State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(2,0),
+                        new CamelPosition(1,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,1)
+                }, new boolean[settings.getNCamels()], new int[] {5}, new int[] {4}));
+
+        assertEquals(null,
+                State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(2,0),
+                        new CamelPosition(1,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,1)
+                }, new boolean[settings.getNCamels()], new int[] {5}, new int[] {5}));
+
+        // Correct
+        assertNotEquals(null,
+                State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(2,0),
+                        new CamelPosition(1,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,1)
+                }, new boolean[settings.getNCamels()], new int[] {6}, new int[] {4}));
+
+        // Too many oasises
+        assertEquals(null,
+                State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(2,0),
+                        new CamelPosition(1,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,1)
+                }, new boolean[settings.getNCamels()], new int[] {}, new int[] {8,10,12,14}));
+
+        // Enough oasises
+        assertNotEquals(null,
+                State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(2,0),
+                        new CamelPosition(1,0),
+                        new CamelPosition(3,0),
+                        new CamelPosition(1,1)
+                }, new boolean[settings.getNCamels()], new int[] {}, new int[] {8,10,12}));
     }
 }

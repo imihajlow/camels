@@ -1,23 +1,23 @@
 package tk.imihajlov.camelup;
 
 
-import android.net.Uri;
+import android.app.ProgressDialog;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.FragmentTransaction;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
-import android.widget.TextView;
+import tk.imihajlov.camelup.engine.CamelPosition;
+import tk.imihajlov.camelup.engine.Engine;
+import tk.imihajlov.camelup.engine.LegResult;
+import tk.imihajlov.camelup.engine.Settings;
+import tk.imihajlov.camelup.engine.State;
+import android.util.Log;
 
 public class MainActivity extends ActionBarActivity implements GameFragment.OnFragmentInteractionListener {
 
@@ -36,9 +36,23 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
      */
     private ViewPager mViewPager;
 
+    private Engine mEngine;
+
+    private ProgressDialog mProgressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mEngine = new Engine();
+        mEngine.setSettings(new Settings());
+        mEngine.setState(State.createOnLegBegin(mEngine.getSettings(), new CamelPosition[] {
+                new CamelPosition(0, 1),
+                new CamelPosition(1, 1),
+                new CamelPosition(2, 0),
+                new CamelPosition(1, 0),
+                new CamelPosition(0, 0)
+        }));
+
         setContentView(R.layout.activity_main);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -47,8 +61,6 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-
-
     }
 
     @Override
@@ -74,8 +86,49 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onGameStateUpdated(State state) {
+        mEngine.setState(state);
+        Log.d("CamelUp", "State changed and it is " + (state == null ? "null" : "not null"));
+    }
 
+    @Override
+    public void onCalculatePressed() {
+        Log.v("CamelUp", "onCalculatePressed");
+        if (mEngine.calculate(new Engine.ResultListener() {
+            @Override
+            public void onCompleted(LegResult result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mProgressDialog.dismiss();
+                        mProgressDialog = null;
+                    }
+                });
+
+                Log.v("CamelUp", "Result has been received: ");
+                StringBuilder sb = new StringBuilder();
+                for (double[] row : result.getProbabilityMatrix()) {
+                    for (double x : row) {
+                        sb.append(String.format("%.3f,", x));
+                    }
+                    sb.append("\n");
+                }
+                Log.v("CamelUp", sb.toString());
+            }
+
+            @Override
+            public void onInterrupted() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mProgressDialog.dismiss();
+                        mProgressDialog = null;
+                    }
+                });
+            }
+        })) {
+            mProgressDialog = ProgressDialog.show(this, "Calculating", "", true);
+        }
     }
 
     /**
@@ -92,7 +145,7 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return GameFragment.newInstance();
+                    return GameFragment.newInstance(mEngine.getSettings(), mEngine.getState());
                 default:
                     return null;
             }
@@ -109,7 +162,7 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
                 case 0:
                     return "Game setup";
                 case 1:
-                    return "";
+                    return "Results";
                 case 2:
                     return "SECTION 3";
             }

@@ -1,13 +1,14 @@
 package tk.imihajlov.camelup.engine;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 
-public class State {
-    private enum CellState {
+public class State implements Serializable {
+    private enum CellState implements Serializable {
         EMPTY,
         CAMEL,
         PLUS,
@@ -38,20 +39,85 @@ public class State {
      * @return new State.
      */
     public static State createOnLegBegin(Settings settings, CamelPosition[] camels) {
-        assert settings.getNCamels() == camels.length : "Different camels count in settings and in camels parameter";
+
         boolean[] dice = new boolean[settings.getNCamels()];
         Arrays.fill(dice, true);
+        return validateAndCreate(settings, camels, dice, new int[] {}, new int[] {});
+    }
+
+    public static State validateAndCreate(Settings settings, CamelPosition[] camels, boolean[] dice, int[] mirages, int[] oasises) {
+        if (camels.length != settings.getNCamels() || dice.length != settings.getNCamels()
+                || mirages.length + oasises.length > settings.getNPlayers()) {
+            return null;
+        }
+        for (CamelPosition p : camels) {
+            if (p == null || p.getX() < 0 || p.getX() >= settings.getNSteps() || p.getY() < 0) {
+                return null;
+            }
+        }
+        for (int x : mirages) {
+            if (x < 0 || x >= settings.getNSteps()) {
+                return null;
+            }
+        }
+        for (int x : oasises) {
+            if (x < 0 || x >= settings.getNSteps()) {
+                return null;
+            }
+        }
+        // Camel positions must be distinct
+        CamelPosition[] sortedCamels = camels.clone();
+        Arrays.sort(sortedCamels);
+        CamelPosition last = null;
+        for (CamelPosition p : sortedCamels) {
+            if (p.equals(last)) {
+                return null;
+            }
+            last = p;
+        }
+        // Max Y for each X must be the same as number-of-camels-for-that-X - 1
+        int[] max = new int[settings.getNSteps()];
+        int[] cnt = new int[settings.getNSteps()];
+        for (CamelPosition p : camels) {
+            max[p.getX()] = Math.max(max[p.getX()], p.getY());
+            cnt[p.getX()] += 1;
+        }
+        for (int i = 0; i < max.length; ++i) {
+            if (cnt[i] > 0 && cnt[i] != max[i] + 1) {
+                return null;
+            }
+        }
+
+        // Fill cell state
         CellState[] cells = new CellState[settings.getNSteps()];
         Arrays.fill(cells, CellState.EMPTY);
         for (CamelPosition p: camels) {
-            assert p.getX() >= 0 && p.getX() < settings.getNSteps() : "Wrong camel X position";
             cells[p.getX()] = CellState.CAMEL;
         }
-        return new State(settings, camels, dice, cells);
+        State state = new State(settings, camels, dice, cells);
+
+        // Try adding mirages and oasises
+        for (int x : mirages) {
+            state = state.putMirage(x);
+            if (state == null) {
+                return null;
+            }
+        }
+        for (int x : oasises) {
+            state = state.putOasis(x);
+            if (state == null) {
+                return null;
+            }
+        }
+        return state;
     }
 
     public boolean[] getDice() {
         return dice;
+    }
+
+    public Settings getSettings() {
+        return settings;
     }
 
     public boolean areDiceLeft() {
@@ -220,6 +286,15 @@ public class State {
                 || cells[position] != CellState.EMPTY
                 || cells[position - 1].isPlusOrMinus()
                 || (position < settings.getNSteps() - 1 && cells[position + 1].isPlusOrMinus())) {
+            return null;
+        }
+        int n = 1;
+        for (CellState s : cells) {
+            if (s == CellState.MINUS || s == CellState.PLUS) {
+                n += 1;
+            }
+        }
+        if (n > settings.getNPlayers()) {
             return null;
         }
         CellState[] cells = this.cells.clone();

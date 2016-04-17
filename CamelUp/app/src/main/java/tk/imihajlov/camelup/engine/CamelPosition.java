@@ -1,6 +1,8 @@
 package tk.imihajlov.camelup.engine;
 
-public class CamelPosition {
+import java.io.Serializable;
+
+public class CamelPosition implements Serializable, Comparable<CamelPosition> {
     private int x;
     private int y;
 
@@ -32,5 +34,14 @@ public class CamelPosition {
         }
         CamelPosition cp = (CamelPosition)o;
         return cp.x == x && cp.y == y;
+    }
+
+    @Override
+    public int compareTo(CamelPosition o) {
+        if (x == o.x) {
+            return y - o.y;
+        } else {
+            return x - o.x;
+        }
     }
 }

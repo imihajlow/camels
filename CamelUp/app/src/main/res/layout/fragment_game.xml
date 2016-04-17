@@ -7,7 +7,7 @@
     <!-- TODO: Update blank fragment layout -->
 
     <ScrollView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/scrollView"
         android:layout_gravity="center_horizontal|top" >
@@ -30,14 +30,6 @@
                 android:text="@string/dice_state"
                 android:id="@+id/textView"
                 android:layout_gravity="center_horizontal" />
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="left">
-
-            </LinearLayout>
 
             <TableLayout
                 android:layout_width="wrap_content"
@@ -126,7 +118,8 @@
 
             <TableLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
 
                 <TableRow
                     android:layout_width="match_parent"

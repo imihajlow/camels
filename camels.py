@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 nCamels = 5
-nPlayers = 4
-nSteps = 10
+nPlayers = 3
+nSteps = 16
 
 class State:
     _dice = []
@@ -83,7 +83,7 @@ def positions(state, result):
     else:
         counter = 0
         for i in (i for i,x in enumerate(state._dice) if x):
-            for value in range(1,7):
+            for value in range(1,4):
                 # just jump
                 counter += positions(state.jump(i, value), result)
                 # or if +1 or -1 can be put, put it and jump
@@ -114,7 +114,8 @@ if __name__ == "__main__":
     test()
     result = [[0 for place in range(nCamels)] for camel in range(nCamels)]
     oldCounter = 0
-    n = positions(State([True for _ in range(nCamels)], [(0,0),(1,0),(2,0),(3,0),(4,0)], set([]), set([])), result)
+    dice = [False, False, False, True, True]
+    n = positions(State(dice, [(0,0),(0,1),(1,0),(1,1),(2,0)], set([]), set([10,11])), result)
     result = [[a/n for a in x] for x in result]
     print("{0} combinations".format(n))
     for i,l in enumerate(result):

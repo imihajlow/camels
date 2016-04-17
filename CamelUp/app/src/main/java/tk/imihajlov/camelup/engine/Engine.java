@@ -29,10 +29,10 @@ public class Engine {
         if (settings == null || state == null || listener == null) {
             return false;
         }
-        if (!stateModified) {
+        /*if (!stateModified) {
             listener.onCompleted(result);
             return true;
-        }
+        }*/
         result = new Result(settings, state, listener);
         (new Thread(result)).start();
         return true;
@@ -83,7 +83,7 @@ public class Engine {
                 int counter = 0;
                 for (int i = 0; i < dice.length; ++i) {
                     if (dice[i]) {
-                        for (int v = 1; v < settings.maxDieValue; ++v) {
+                        for (int v = 1; v <= settings.maxDieValue; ++v) {
                             // Just jump
                             counter += positions(state.jump(i, v));
                             // Or if +1 or -1 can be put, put it and jump

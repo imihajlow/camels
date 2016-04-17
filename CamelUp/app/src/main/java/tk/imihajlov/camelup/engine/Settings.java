@@ -1,6 +1,8 @@
 package tk.imihajlov.camelup.engine;
 
-public class Settings {
+import java.io.Serializable;
+
+public class Settings implements Serializable {
     public final static int maxDieValue = 3;
     private int nPlayers = 3;
     private int nCamels = 5;
