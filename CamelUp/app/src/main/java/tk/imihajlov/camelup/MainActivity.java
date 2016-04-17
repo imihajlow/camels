@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -18,6 +19,7 @@ import tk.imihajlov.camelup.engine.LegResult;
 import tk.imihajlov.camelup.engine.Settings;
 import tk.imihajlov.camelup.engine.State;
 import android.util.Log;
+import android.view.ViewGroup;
 
 public class MainActivity extends ActionBarActivity implements GameFragment.OnFragmentInteractionListener {
 
@@ -38,6 +40,8 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
 
     private Engine mEngine;
 
+    private LegResult mResult;
+
     private ProgressDialog mProgressDialog;
 
     @Override
@@ -46,11 +50,11 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
         mEngine = new Engine();
         mEngine.setSettings(new Settings());
         mEngine.setState(State.createOnLegBegin(mEngine.getSettings(), new CamelPosition[] {
+                new CamelPosition(0, 0),
                 new CamelPosition(0, 1),
-                new CamelPosition(1, 1),
-                new CamelPosition(2, 0),
                 new CamelPosition(1, 0),
-                new CamelPosition(0, 0)
+                new CamelPosition(1, 1),
+                new CamelPosition(2, 0)
         }));
 
         setContentView(R.layout.activity_main);
@@ -88,7 +92,6 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
     @Override
     public void onGameStateUpdated(State state) {
         mEngine.setState(state);
-        Log.d("CamelUp", "State changed and it is " + (state == null ? "null" : "not null"));
     }
 
     @Override
@@ -126,6 +129,16 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
                     sb.append(String.format("%.3f, ", x));
                 }
                 Log.v("CamelUp", sb.toString());
+
+                mResult = result;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ResultsFragment fragment = (ResultsFragment) mSectionsPagerAdapter.getRegisteredFragment(SectionsPagerAdapter.PAGE_RESULTS);
+                        fragment.setResult(mResult);
+                        mViewPager.setCurrentItem(SectionsPagerAdapter.PAGE_RESULTS);
+                    }
+                });
             }
 
             @Override
@@ -148,6 +161,10 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        public static final int PAGE_SETUP = 0;
+        public static final int PAGE_RESULTS = 1;
+
+        private SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -156,8 +173,10 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
         @Override
         public Fragment getItem(int position) {
             switch (position) {
-                case 0:
+                case PAGE_SETUP:
                     return GameFragment.newInstance(mEngine.getSettings(), mEngine.getState());
+                case PAGE_RESULTS:
+                    return ResultsFragment.newInstance(mResult);
                 default:
                     return null;
             }
@@ -165,20 +184,35 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
 
         @Override
         public int getCount() {
-            return 1;
+            return 2;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
-                case 0:
+                case PAGE_SETUP:
                     return "Game setup";
-                case 1:
+                case PAGE_RESULTS:
                     return "Results";
-                case 2:
-                    return "SECTION 3";
             }
             return null;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment fragment = (Fragment) super.instantiateItem(container, position);
+            registeredFragments.put(position, fragment);
+            return fragment;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            registeredFragments.remove(position);
+            super.destroyItem(container, position, object);
+        }
+
+        public Fragment getRegisteredFragment(int position) {
+            return registeredFragments.get(position);
         }
     }
 }

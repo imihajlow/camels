@@ -18,7 +18,6 @@ public class Engine {
 
     public void setState(State state) {
         this.state = state;
-        stateModified = true;
     }
 
     public State getState() {
@@ -29,10 +28,6 @@ public class Engine {
         if (settings == null || state == null || listener == null) {
             return false;
         }
-        /*if (!stateModified) {
-            listener.onCompleted(result);
-            return true;
-        }*/
         result = new Result(settings, state, listener);
         (new Thread(result)).start();
         return true;
@@ -40,7 +35,6 @@ public class Engine {
 
     private Settings settings;
     private State state;
-    private boolean stateModified = true;
     private Result result;
 
     private class Result implements Runnable {
@@ -51,99 +45,11 @@ public class Engine {
             this.listener = listener;
         }
 
-        private class ResultAccumulator implements LegResult {
-            private double[][] result;
-            private double[] wins;
-            private double[] looses;
-            private double[] absoluteWins;
-            private double[] absoulteLooses;
-
-            private int nResults;
-            private int nFinals;
-
-            @Override
-            public double[][] getProbabilityMatrix() {
-                return result;
-            }
-
-            @Override
-            public double[] getWinProbability() {
-                return wins;
-            }
-
-            @Override
-            public double[] getLooseProbability() {
-                return looses;
-            }
-
-            @Override
-            public double[] getAbsoluteWinProbability() {
-                return absoluteWins;
-            }
-
-            @Override
-            public double[] getAbsoluteLooseProbability() {
-                return absoulteLooses;
-            }
-
-            public ResultAccumulator(int nCamels) {
-                reset(nCamels);
-            }
-
-            public void reset(int nCamels) {
-                result = new double[nCamels][nCamels];
-                wins = new double[nCamels];
-                looses = new double[nCamels];
-                absoluteWins = new double[nCamels];
-                absoulteLooses = new double[nCamels];
-                nResults = 0;
-                nFinals = 0;
-            }
-
-            public void addPositions(int[] positions) {
-                if (nResults == 0) {
-                    reset(result.length);
-                }
-                for (int i = 0; i < positions.length; ++i) {
-                    result[positions[i]][i] += 1;
-                }
-                nResults += 1;
-            }
-
-            public void addFinal(int[] positions) {
-                addPositions(positions);
-                nFinals += 1;
-                wins[positions[0]] += 1;
-                looses[positions[positions.length - 1]] += 1;
-            }
-
-            public void finalize() {
-                if (nResults > 0) {
-                    for (double[] row : result) {
-                        for (int i = 0; i < row.length; ++i) {
-                            row[i] /= nResults;
-                        }
-                    }
-                }
-                assert wins.length == looses.length;
-                if (nFinals > 0) {
-                    for (int i = 0; i < wins.length; ++i) {
-                        absoluteWins[i] = wins[i] / nResults;
-                        absoulteLooses[i] = looses[i] / nResults;
-                        wins[i] /= nFinals;
-                        looses[i] /= nFinals;
-                    }
-                }
-                nResults = 0;
-                nFinals = 0;
-            }
-        }
-
         @Override
         public void run() {
-            result = new ResultAccumulator(settings.getNCamels());
+            result = new LegResult(settings.getNCamels());
             positions(state);
-            result.finalize();
+            result.finish();
             listener.onCompleted(result);
         }
 
@@ -179,6 +85,6 @@ public class Engine {
         private Settings settings;
         private State state;
         private ResultListener listener;
-        private ResultAccumulator result;
+        private LegResult result;
     }
 }

@@ -164,17 +164,17 @@ public class GameFragment extends Fragment {
         ((CheckBox) view.findViewById(R.id.checkBoxDice3)).setChecked(mGameState.getDice()[3]);
         ((CheckBox) view.findViewById(R.id.checkBoxDice4)).setChecked(mGameState.getDice()[4]);
 
-        ((EditText) view.findViewById(R.id.editCamelX0)).setText(String.format("%d", mGameState.getCamelPosition(0).getX()));
-        ((EditText) view.findViewById(R.id.editCamelX1)).setText(String.format("%d", mGameState.getCamelPosition(1).getX()));
-        ((EditText) view.findViewById(R.id.editCamelX2)).setText(String.format("%d", mGameState.getCamelPosition(2).getX()));
-        ((EditText) view.findViewById(R.id.editCamelX3)).setText(String.format("%d", mGameState.getCamelPosition(3).getX()));
-        ((EditText) view.findViewById(R.id.editCamelX4)).setText(String.format("%d", mGameState.getCamelPosition(4).getX()));
+        ((EditText) view.findViewById(R.id.editCamelX0)).setText(String.format("%d", mGameState.getCamelPosition(0).getX() + 1));
+        ((EditText) view.findViewById(R.id.editCamelX1)).setText(String.format("%d", mGameState.getCamelPosition(1).getX() + 1));
+        ((EditText) view.findViewById(R.id.editCamelX2)).setText(String.format("%d", mGameState.getCamelPosition(2).getX() + 1));
+        ((EditText) view.findViewById(R.id.editCamelX3)).setText(String.format("%d", mGameState.getCamelPosition(3).getX() + 1));
+        ((EditText) view.findViewById(R.id.editCamelX4)).setText(String.format("%d", mGameState.getCamelPosition(4).getX() + 1));
 
-        ((EditText) view.findViewById(R.id.editCamelY0)).setText(String.format("%d", mGameState.getCamelPosition(0).getY()));
-        ((EditText) view.findViewById(R.id.editCamelY1)).setText(String.format("%d", mGameState.getCamelPosition(1).getY()));
-        ((EditText) view.findViewById(R.id.editCamelY2)).setText(String.format("%d", mGameState.getCamelPosition(2).getY()));
-        ((EditText) view.findViewById(R.id.editCamelY3)).setText(String.format("%d", mGameState.getCamelPosition(3).getY()));
-        ((EditText) view.findViewById(R.id.editCamelY4)).setText(String.format("%d", mGameState.getCamelPosition(4).getY()));
+        ((EditText) view.findViewById(R.id.editCamelY0)).setText(String.format("%d", mGameState.getCamelPosition(0).getY() + 1));
+        ((EditText) view.findViewById(R.id.editCamelY1)).setText(String.format("%d", mGameState.getCamelPosition(1).getY() + 1));
+        ((EditText) view.findViewById(R.id.editCamelY2)).setText(String.format("%d", mGameState.getCamelPosition(2).getY() + 1));
+        ((EditText) view.findViewById(R.id.editCamelY3)).setText(String.format("%d", mGameState.getCamelPosition(3).getY() + 1));
+        ((EditText) view.findViewById(R.id.editCamelY4)).setText(String.format("%d", mGameState.getCamelPosition(4).getY() + 1));
 
         EditText[] edits = new EditText[] {
                 (EditText) view.findViewById(R.id.editPlusMinus0),
@@ -192,7 +192,7 @@ public class GameFragment extends Fragment {
             if (i >= edits.length) {
                 break;
             }
-            edits[i].setText(String.format("%d", n));
+            edits[i].setText(String.format("%d", n + 1));
             checkBoxes[i].setChecked(true);
             i += 1;
         }
@@ -200,7 +200,7 @@ public class GameFragment extends Fragment {
             if (i >= edits.length) {
                 break;
             }
-            edits[i].setText(String.format("%d", n));
+            edits[i].setText(String.format("%d", n + 1));
             checkBoxes[i].setChecked(false);
             i += 1;
         }
@@ -218,16 +218,16 @@ public class GameFragment extends Fragment {
         CamelPosition[] camels;
         try {
             camels = new CamelPosition[]{
-                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX0)).getText().toString()),
-                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY0)).getText().toString())),
-                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX1)).getText().toString()),
-                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY1)).getText().toString())),
-                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX2)).getText().toString()),
-                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY2)).getText().toString())),
-                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX3)).getText().toString()),
-                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY3)).getText().toString())),
-                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX4)).getText().toString()),
-                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY4)).getText().toString())),
+                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX0)).getText().toString()) - 1,
+                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY0)).getText().toString()) - 1),
+                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX1)).getText().toString()) - 1,
+                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY1)).getText().toString()) - 1),
+                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX2)).getText().toString()) - 1,
+                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY2)).getText().toString()) - 1),
+                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX3)).getText().toString()) - 1,
+                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY3)).getText().toString()) - 1),
+                    new CamelPosition(Integer.valueOf(((EditText) view.findViewById(R.id.editCamelX4)).getText().toString()) - 1,
+                            Integer.valueOf(((EditText) view.findViewById(R.id.editCamelY4)).getText().toString()) - 1),
             };
         } catch (NumberFormatException e) {
             return null;
@@ -247,7 +247,7 @@ public class GameFragment extends Fragment {
         assert edits.length == checkBoxes.length;
         for (int i = 0; i < edits.length; ++i) {
             try {
-                Integer x = Integer.parseInt(edits[i].getText().toString());
+                Integer x = Integer.parseInt(edits[i].getText().toString()) - 1;
                 if (checkBoxes[i].isChecked()) {
                     oasises.add(x);
                 } else {
