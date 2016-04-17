@@ -25,9 +25,6 @@ import tk.imihajlov.camelup.engine.State;
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ResultsFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
  * Use the {@link ResultsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
