@@ -206,4 +206,14 @@ public class StateTest {
                         new CamelPosition(1,1)
                 }, new boolean[settings.getNCamels()], new int[] {}, new int[] {8,10,12}));
     }
+
+    @Test
+    public void testLegGains() {
+        State state = createState();
+        int[] gains = state.getLegWinnerGains();
+        assertEquals(state.getSettings().getNCamels(), gains.length);
+        for (int n: gains) {
+            assertEquals(5, n);
+        }
+    }
 }

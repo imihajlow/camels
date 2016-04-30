@@ -1,8 +1,15 @@
 package tk.imihajlov.camelup.engine;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import tk.imihajlov.camelup.engine.actions.BetLegWinner;
+import tk.imihajlov.camelup.engine.actions.Dice;
 
 public class LegResult implements Serializable {
+    private final int[] legWinnerGains;
     private double[][] result;
     private double[] wins;
     private double[] looses;
@@ -32,11 +39,29 @@ public class LegResult implements Serializable {
         return absoluteLooses;
     }
 
-    LegResult(int nCamels) {
+    /**
+     * Get an array of actions sorted by expected gain.
+     * @return array of player actions.
+     */
+    public PlayerAction[] getSuggestedActions() {
+        List<PlayerAction> actions = new ArrayList<PlayerAction>();
+        actions.add(new Dice());
+        for (int i = 0; i < result.length; ++i) {
+            if (legWinnerGains[i] > 0) {
+                actions.add(new BetLegWinner(i, legWinnerGains[i], result[i]));
+            }
+        }
+        Collections.sort(actions);
+        Collections.reverse(actions);
+        return actions.toArray(new PlayerAction[0]);
+    }
+
+    LegResult(int nCamels, int[] legWinnerGains) {
+        this.legWinnerGains = legWinnerGains;
         reset(nCamels);
     }
 
-    void reset(int nCamels) {
+    private void reset(int nCamels) {
         result = new double[nCamels][nCamels];
         wins = new double[nCamels];
         looses = new double[nCamels];

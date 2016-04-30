@@ -2,9 +2,14 @@ package tk.imihajlov.camelup.engine;
 
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
+import java.util.Queue;
+import java.util.Stack;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 public class State implements Serializable {
@@ -25,6 +30,7 @@ public class State implements Serializable {
     private boolean[] dice;
     private CamelPosition[] camels;
     private CellState[] cells;
+    private List<Queue<Integer>> legBetCards;
 
     private State(Settings settings, CamelPosition[] camels, boolean[] dice, CellState[] cells) {
         this.settings = settings;
@@ -32,6 +38,14 @@ public class State implements Serializable {
         this.camels = camels.clone();
         this.cells = cells.clone();
         this.gameEnd = false;
+        this.legBetCards = new ArrayList<Queue<Integer>>(settings.getNCamels());
+        for (int i = 0; i < settings.getNCamels(); ++i) {
+            Queue<Integer> q = new ArrayDeque<Integer>();
+            this.legBetCards.add(q);
+            q.add(5);
+            q.add(3);
+            q.add(2);
+        }
     }
 
     /** State at the endgame.
@@ -296,6 +310,14 @@ public class State implements Serializable {
 
     public boolean isGameEnd() {
         return gameEnd;
+    }
+
+    public int[] getLegWinnerGains() {
+        List<Integer> result = new ArrayList<Integer>();
+        for (Queue<Integer> q : legBetCards) {
+            result.add(q.peek());
+        }
+        return ArrayUtils.toPrimitive(result.toArray(new Integer[0]));
     }
 
     private int[] getCellStates(CellState state) {

@@ -47,7 +47,7 @@ public class Engine {
 
         @Override
         public void run() {
-            result = new LegResult(settings.getNCamels());
+            result = new LegResult(settings.getNCamels(), state.getLegWinnerGains());
             positions(state);
             result.finish();
             listener.onCompleted(result);

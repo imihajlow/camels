@@ -117,7 +117,7 @@ public class ResultsFragment extends Fragment {
 
             BarData barData = new BarData(axisValues, dataSets);
             chart.setData(barData);
-            chart.animateX(2000);
+            chart.animateXY(0, 2000);
             chart.getAxisLeft().setAxisMaxValue(1.0f);
             chart.getAxisRight().setAxisMaxValue(1.0f);
             view.invalidate();
