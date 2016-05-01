@@ -9,4 +9,5 @@
     <string name="dice_state">Dice state</string>
     <string name="camels_state">Camels state</string>
     <string name="plusminux">+1/-1</string>
+    <string name="players_count">Number of players</string>
 </resources>

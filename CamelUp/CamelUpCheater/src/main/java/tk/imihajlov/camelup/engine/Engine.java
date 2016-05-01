@@ -8,8 +8,10 @@ public class Engine {
     }
 
     public void setSettings(Settings settings) {
-        this.settings = settings;
-        this.state = null;
+        if (!settings.equals(this.settings)) {
+            this.settings = settings;
+            this.state = null;
+        }
     }
 
     public Settings getSettings() {

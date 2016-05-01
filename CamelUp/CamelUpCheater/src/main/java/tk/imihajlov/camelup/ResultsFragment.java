@@ -31,7 +31,6 @@ import tk.imihajlov.camelup.engine.State;
 public class ResultsFragment extends Fragment {
     private static final String ARG_RESULT = "result";
 
-    // TODO: Rename and change types of parameters
     private LegResult mResult;
 
     public ResultsFragment() {

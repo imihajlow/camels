@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.TableRow;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -27,11 +29,15 @@ public class GameFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private Settings mGameSettings;
     private State mGameState;
+    private List<EditText> mPlusMinusEdits;
+    private List<CheckBox> mPlusMinusCheckboxes;
     public static final String ARG_STATE = "state";
     public static final String ARG_SETTINGS = "settings";
 
     public GameFragment() {
         // Required empty public constructor
+        mPlusMinusCheckboxes = new ArrayList<CheckBox>();
+        mPlusMinusEdits = new ArrayList<EditText>();
     }
 
     /**
@@ -63,8 +69,9 @@ public class GameFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_game, container, false);
+        view = updateViewWithCurrentSettings(view);
         if (mGameState != null) {
-            view = updateViewWithCurrentState(view);
+            view = updateViewWithState(view, mGameState);
         }
         attachHandlers(view);
         ((Button) view.findViewById(R.id.buttonCalculate)).setOnClickListener(new View.OnClickListener() {
@@ -93,6 +100,20 @@ public class GameFragment extends Fragment {
         mListener = null;
     }
 
+    public void setData(Settings settings, State state) {
+        mGameState = state;
+        mGameSettings = settings;
+        updateViewWithCurrentSettings(getView());
+        updateViewWithState(getView(), mGameState);
+    }
+
+    private void parseAndCheck() {
+        State newState = tryParseState(getView());
+        mGameState = newState;
+        mListener.onGameStateUpdated(newState);
+        ((Button) getView().findViewById(R.id.buttonCalculate)).setEnabled(mGameState != null);
+    }
+
     private void attachHandlers(View view) {
         TextWatcher editWatcher = new TextWatcher() {
             @Override
@@ -101,10 +122,7 @@ public class GameFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                State newState = tryParseState(getView());
-                mGameState = newState;
-                mListener.onGameStateUpdated(newState);
-                ((Button) getView().findViewById(R.id.buttonCalculate)).setEnabled(mGameState != null);
+                parseAndCheck();
             }
 
             @Override
@@ -121,10 +139,7 @@ public class GameFragment extends Fragment {
                 R.id.editCamelY1,
                 R.id.editCamelY2,
                 R.id.editCamelY3,
-                R.id.editCamelY4,
-                R.id.editPlusMinus0,
-                R.id.editPlusMinus1,
-                R.id.editPlusMinus2
+                R.id.editCamelY4
         };
         for (int id : edits) {
             ((EditText) view.findViewById(id)).addTextChangedListener(editWatcher);
@@ -133,10 +148,7 @@ public class GameFragment extends Fragment {
         CompoundButton.OnCheckedChangeListener checkboxListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                State newState = tryParseState(getView());
-                mGameState = newState;
-                mListener.onGameStateUpdated(newState);
-                ((Button) getView().findViewById(R.id.buttonCalculate)).setEnabled(mGameState != null);
+                parseAndCheck();
             }
         };
         int[] checkboxes = new int[] {
@@ -144,64 +156,93 @@ public class GameFragment extends Fragment {
                 R.id.checkBoxDice1,
                 R.id.checkBoxDice2,
                 R.id.checkBoxDice3,
-                R.id.checkBoxDice4,
-                R.id.checkBoxIsPlus0,
-                R.id.checkBoxIsPlus1,
-                R.id.checkBoxIsPlus2,
+                R.id.checkBoxDice4
         };
         for (int id : checkboxes) {
             ((CheckBox) view.findViewById(id)).setOnCheckedChangeListener(checkboxListener);
         }
     }
 
-    private View updateViewWithCurrentState(View view) {
-        if (mGameState.isGameEnd()) {
+    private View updateViewWithCurrentSettings(View view) {
+        // Remove all edits and checkboxes
+        ViewGroup rowEdits = (ViewGroup) view.findViewById(R.id.rowPlusMinusX);
+        rowEdits.removeViews(1, rowEdits.getChildCount() - 1);
+        ViewGroup rowCheckBoxes = (ViewGroup) view.findViewById(R.id.rowPlusMinusIsPlus);
+        rowCheckBoxes.removeViews(1, rowCheckBoxes.getChildCount() - 1);
+        mPlusMinusCheckboxes.clear();
+        mPlusMinusEdits.clear();
+
+        for (int i = 0; i < mGameSettings.getNPlayers(); ++i) {
+            EditText edit = new EditText(getActivity());
+            edit.setInputType(InputType.TYPE_CLASS_NUMBER);
+            edit.setMaxEms(5);
+            edit.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    parseAndCheck();
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) { }
+            });
+
+            CheckBox checkBox = new CheckBox(getActivity());
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    parseAndCheck();
+                }
+            });
+
+            mPlusMinusEdits.add(edit);
+            mPlusMinusCheckboxes.add(checkBox);
+            rowEdits.addView(edit);
+            rowCheckBoxes.addView(checkBox);
+        }
+        return view;
+    }
+
+    private View updateViewWithState(View view, State state) {
+        if (state.isGameEnd()) {
             return view; // TODO what?
         }
-        ((CheckBox) view.findViewById(R.id.checkBoxDice0)).setChecked(mGameState.getDice()[0]);
-        ((CheckBox) view.findViewById(R.id.checkBoxDice1)).setChecked(mGameState.getDice()[1]);
-        ((CheckBox) view.findViewById(R.id.checkBoxDice2)).setChecked(mGameState.getDice()[2]);
-        ((CheckBox) view.findViewById(R.id.checkBoxDice3)).setChecked(mGameState.getDice()[3]);
-        ((CheckBox) view.findViewById(R.id.checkBoxDice4)).setChecked(mGameState.getDice()[4]);
+        ((CheckBox) view.findViewById(R.id.checkBoxDice0)).setChecked(state.getDice()[0]);
+        ((CheckBox) view.findViewById(R.id.checkBoxDice1)).setChecked(state.getDice()[1]);
+        ((CheckBox) view.findViewById(R.id.checkBoxDice2)).setChecked(state.getDice()[2]);
+        ((CheckBox) view.findViewById(R.id.checkBoxDice3)).setChecked(state.getDice()[3]);
+        ((CheckBox) view.findViewById(R.id.checkBoxDice4)).setChecked(state.getDice()[4]);
 
-        ((EditText) view.findViewById(R.id.editCamelX0)).setText(String.format("%d", mGameState.getCamelPosition(0).getX() + 1));
-        ((EditText) view.findViewById(R.id.editCamelX1)).setText(String.format("%d", mGameState.getCamelPosition(1).getX() + 1));
-        ((EditText) view.findViewById(R.id.editCamelX2)).setText(String.format("%d", mGameState.getCamelPosition(2).getX() + 1));
-        ((EditText) view.findViewById(R.id.editCamelX3)).setText(String.format("%d", mGameState.getCamelPosition(3).getX() + 1));
-        ((EditText) view.findViewById(R.id.editCamelX4)).setText(String.format("%d", mGameState.getCamelPosition(4).getX() + 1));
+        ((EditText) view.findViewById(R.id.editCamelX0)).setText(String.format("%d", state.getCamelPosition(0).getX() + 1));
+        ((EditText) view.findViewById(R.id.editCamelX1)).setText(String.format("%d", state.getCamelPosition(1).getX() + 1));
+        ((EditText) view.findViewById(R.id.editCamelX2)).setText(String.format("%d", state.getCamelPosition(2).getX() + 1));
+        ((EditText) view.findViewById(R.id.editCamelX3)).setText(String.format("%d", state.getCamelPosition(3).getX() + 1));
+        ((EditText) view.findViewById(R.id.editCamelX4)).setText(String.format("%d", state.getCamelPosition(4).getX() + 1));
 
-        ((EditText) view.findViewById(R.id.editCamelY0)).setText(String.format("%d", mGameState.getCamelPosition(0).getY() + 1));
-        ((EditText) view.findViewById(R.id.editCamelY1)).setText(String.format("%d", mGameState.getCamelPosition(1).getY() + 1));
-        ((EditText) view.findViewById(R.id.editCamelY2)).setText(String.format("%d", mGameState.getCamelPosition(2).getY() + 1));
-        ((EditText) view.findViewById(R.id.editCamelY3)).setText(String.format("%d", mGameState.getCamelPosition(3).getY() + 1));
-        ((EditText) view.findViewById(R.id.editCamelY4)).setText(String.format("%d", mGameState.getCamelPosition(4).getY() + 1));
+        ((EditText) view.findViewById(R.id.editCamelY0)).setText(String.format("%d", state.getCamelPosition(0).getY() + 1));
+        ((EditText) view.findViewById(R.id.editCamelY1)).setText(String.format("%d", state.getCamelPosition(1).getY() + 1));
+        ((EditText) view.findViewById(R.id.editCamelY2)).setText(String.format("%d", state.getCamelPosition(2).getY() + 1));
+        ((EditText) view.findViewById(R.id.editCamelY3)).setText(String.format("%d", state.getCamelPosition(3).getY() + 1));
+        ((EditText) view.findViewById(R.id.editCamelY4)).setText(String.format("%d", state.getCamelPosition(4).getY() + 1));
 
-        EditText[] edits = new EditText[] {
-                (EditText) view.findViewById(R.id.editPlusMinus0),
-                (EditText) view.findViewById(R.id.editPlusMinus1),
-                (EditText) view.findViewById(R.id.editPlusMinus2)
-        };
-        CheckBox[] checkBoxes = new CheckBox[] {
-                (CheckBox) view.findViewById(R.id.checkBoxIsPlus0),
-                (CheckBox) view.findViewById(R.id.checkBoxIsPlus1),
-                (CheckBox) view.findViewById(R.id.checkBoxIsPlus2)
-        };
-        assert edits.length == checkBoxes.length;
+        assert mPlusMinusCheckboxes.size() == mPlusMinusEdits.size();
         int i = 0;
-        for (int n : mGameState.getOasises()) {
-            if (i >= edits.length) {
+        for (int n : state.getOasises()) {
+            if (i >= mPlusMinusEdits.size()) {
                 break;
             }
-            edits[i].setText(String.format("%d", n + 1));
-            checkBoxes[i].setChecked(true);
+            mPlusMinusEdits.get(i).setText(String.format("%d", n + 1));
+            mPlusMinusCheckboxes.get(i).setChecked(true);
             i += 1;
         }
-        for (int n : mGameState.getMirages()) {
-            if (i >= edits.length) {
+        for (int n : state.getMirages()) {
+            if (i >= mPlusMinusEdits.size()) {
                 break;
             }
-            edits[i].setText(String.format("%d", n + 1));
-            checkBoxes[i].setChecked(false);
+            mPlusMinusEdits.get(i).setText(String.format("%d", n + 1));
+            mPlusMinusCheckboxes.get(i).setChecked(false);
             i += 1;
         }
         return view;
@@ -234,21 +275,13 @@ public class GameFragment extends Fragment {
         }
         List<Integer> mirages = new ArrayList<Integer>();
         List<Integer> oasises = new ArrayList<Integer>();
-        EditText[] edits = new EditText[] {
-                (EditText) view.findViewById(R.id.editPlusMinus0),
-                (EditText) view.findViewById(R.id.editPlusMinus1),
-                (EditText) view.findViewById(R.id.editPlusMinus2)
-        };
-        CheckBox[] checkBoxes = new CheckBox[] {
-                (CheckBox) view.findViewById(R.id.checkBoxIsPlus0),
-                (CheckBox) view.findViewById(R.id.checkBoxIsPlus1),
-                (CheckBox) view.findViewById(R.id.checkBoxIsPlus2)
-        };
-        assert edits.length == checkBoxes.length;
-        for (int i = 0; i < edits.length; ++i) {
+
+        assert mPlusMinusEdits.size() == mPlusMinusCheckboxes.size();
+        assert mPlusMinusEdits.size() == mGameSettings.getNPlayers();
+        for (int i = 0; i < mGameSettings.getNPlayers(); ++i) {
             try {
-                Integer x = Integer.parseInt(edits[i].getText().toString()) - 1;
-                if (checkBoxes[i].isChecked()) {
+                Integer x = Integer.parseInt(mPlusMinusEdits.get(i).getText().toString()) - 1;
+                if (mPlusMinusCheckboxes.get(i).isChecked()) {
                     oasises.add(x);
                 } else {
                     mirages.add(x);

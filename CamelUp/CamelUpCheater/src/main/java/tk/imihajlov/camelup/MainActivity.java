@@ -2,6 +2,7 @@ package tk.imihajlov.camelup;
 
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 
 import android.support.v4.app.Fragment;
@@ -23,6 +24,7 @@ import android.view.ViewGroup;
 
 public class MainActivity extends ActionBarActivity implements GameFragment.OnFragmentInteractionListener {
 
+    private static final int SETTINGS_REQUEST = 1;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -49,13 +51,7 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
         super.onCreate(savedInstanceState);
         mEngine = new Engine();
         mEngine.setSettings(new Settings());
-        mEngine.setState(State.createOnLegBegin(mEngine.getSettings(), new CamelPosition[] {
-                new CamelPosition(0, 0),
-                new CamelPosition(0, 1),
-                new CamelPosition(1, 0),
-                new CamelPosition(1, 1),
-                new CamelPosition(2, 0)
-        }));
+        mEngine.setState(createDefaultState(mEngine.getSettings()));
 
         setContentView(R.layout.activity_main);
         // Create the adapter that will return a fragment for each of the three
@@ -81,12 +77,41 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            intent.putExtra(SettingsActivity.MSG_SETINGS, mEngine.getSettings());
+            startActivityForResult(intent, SETTINGS_REQUEST);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SETTINGS_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Settings settings = (Settings) data.getSerializableExtra(SettingsActivity.MSG_SETINGS);
+                mEngine.setSettings(settings);
+                if (mEngine.getState() == null) {
+                    mEngine.setState(createDefaultState(mEngine.getSettings()));
+                }
+                GameFragment fragment = (GameFragment) mSectionsPagerAdapter.getRegisteredFragment(SectionsPagerAdapter.PAGE_SETUP);
+                fragment.setData(mEngine.getSettings(), mEngine.getState());
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private static State createDefaultState(Settings settings) {
+        return State.createOnLegBegin(settings, new CamelPosition[] {
+                new CamelPosition(0, 0),
+                new CamelPosition(0, 1),
+                new CamelPosition(1, 0),
+                new CamelPosition(1, 1),
+                new CamelPosition(2, 0)
+        });
     }
 
     @Override

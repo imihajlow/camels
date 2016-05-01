@@ -11,6 +11,10 @@ public class Settings implements Serializable {
     public Settings() {
     }
 
+    public Settings(int nPlayers) {
+        this.nPlayers = nPlayers;
+    }
+
     public Settings(int nPlayers, int nCamels, int nSteps) {
         this.nPlayers = nPlayers;
         this.nCamels = nCamels;
@@ -27,5 +31,15 @@ public class Settings implements Serializable {
 
     public int getNSteps() {
         return nSteps;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        Settings s = (Settings) o;
+        if (s != null) {
+            return s.nPlayers == nPlayers && s.nSteps == nSteps && s.nCamels == nCamels;
+        } else {
+            return false;
+        }
     }
 }
