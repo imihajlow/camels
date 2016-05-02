@@ -28,10 +28,8 @@ import tk.imihajlov.camelup.engine.State;
  * Use the {@link ResultsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ResultsFragment extends Fragment {
-    private static final String ARG_RESULT = "result";
-
-    private LegResult mResult;
+public class ResultsFragment extends Fragment implements Updatable {
+    private InteractionListener mListener;
 
     public ResultsFragment() {
         // Required empty public constructor
@@ -41,23 +39,16 @@ public class ResultsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param result leg result
      * @return A new instance of fragment ResultsFragment.
      */
-    public static ResultsFragment newInstance(LegResult result) {
+    public static ResultsFragment newInstance() {
         ResultsFragment fragment = new ResultsFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ARG_RESULT, result);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mResult = (LegResult) getArguments().getSerializable(ARG_RESULT);
-        }
     }
 
     @Override
@@ -69,13 +60,33 @@ public class ResultsFragment extends Fragment {
         return view;
     }
 
-    public void setResult(LegResult result) {
-        mResult = result;
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (activity instanceof InteractionListener) {
+            mListener = (InteractionListener) activity;
+        } else {
+            throw new RuntimeException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    @Override
+    public void onDataUpdated() {
         updateViewWithCurrentResult(getView());
     }
 
     private void updateViewWithCurrentResult(View view) {
-        if (mResult == null) {
+        if (mListener == null) {
+            return;
+        }
+        if (mListener.getResult() == null) {
             view.findViewById(R.id.textViewNoResults).setVisibility(View.VISIBLE);
             view.findViewById(R.id.chartResults).setVisibility(View.GONE);
             view.invalidate();
@@ -102,7 +113,7 @@ public class ResultsFragment extends Fragment {
                     R.color.colorCamel3,
                     R.color.colorCamel4
             };
-            double[][] matrix = mResult.getProbabilityMatrix();
+            double[][] matrix = mListener.getResult().getProbabilityMatrix();
             assert matrix.length == 5;
             for (int i = 0; i < matrix.length; ++i) {
                 List<BarEntry> valueSet = new ArrayList<BarEntry>();

@@ -22,9 +22,12 @@ import tk.imihajlov.camelup.engine.State;
 import android.util.Log;
 import android.view.ViewGroup;
 
-public class MainActivity extends ActionBarActivity implements GameFragment.OnFragmentInteractionListener {
+public class MainActivity extends ActionBarActivity implements InteractionListener {
 
     private static final int SETTINGS_REQUEST = 1;
+
+    private static final String PARAM_ENGINE = "engine";
+
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -42,16 +45,18 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
 
     private Engine mEngine;
 
-    private LegResult mResult;
-
     private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mEngine = new Engine();
-        mEngine.setSettings(new Settings());
-        mEngine.setState(createDefaultState(mEngine.getSettings()));
+        if (savedInstanceState != null) {
+            mEngine = (Engine) savedInstanceState.getSerializable(PARAM_ENGINE);
+        } else {
+            mEngine = new Engine();
+            mEngine.setSettings(new Settings());
+            mEngine.setState(createDefaultState(mEngine.getSettings()));
+        }
 
         setContentView(R.layout.activity_main);
         // Create the adapter that will return a fragment for each of the three
@@ -61,6 +66,12 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle state) {
+        state.putSerializable(PARAM_ENGINE, mEngine);
+        super.onSaveInstanceState(state);
     }
 
     @Override
@@ -96,8 +107,7 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
                 if (mEngine.getState() == null) {
                     mEngine.setState(createDefaultState(mEngine.getSettings()));
                 }
-                GameFragment fragment = (GameFragment) mSectionsPagerAdapter.getRegisteredFragment(SectionsPagerAdapter.PAGE_SETUP);
-                fragment.setData(mEngine.getSettings(), mEngine.getState());
+                mSectionsPagerAdapter.updateAll();
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -120,11 +130,26 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
     }
 
     @Override
+    public State getState() {
+        return mEngine.getState();
+    }
+
+    @Override
+    public Settings getSettings() {
+        return mEngine.getSettings();
+    }
+
+    @Override
+    public LegResult getResult() {
+        return mEngine.getResult();
+    }
+
+    @Override
     public void onCalculatePressed() {
         Log.v("CamelUp", "onCalculatePressed");
         if (mEngine.calculate(new Engine.ResultListener() {
             @Override
-            public void onCompleted(LegResult result) {
+            public void onCompleted() {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -133,7 +158,8 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
                     }
                 });
 
-                Log.v("CamelUp", "Result has been received: ");
+                LegResult result = mEngine.getResult();
+                Log.v("CamelUp", "ResultCalculator has been received: ");
                 StringBuilder sb = new StringBuilder();
                 for (double[] row : result.getProbabilityMatrix()) {
                     for (double x : row) {
@@ -155,13 +181,11 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
                 }
                 Log.v("CamelUp", sb.toString());
 
-                mResult = result;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ResultsFragment fragment = (ResultsFragment) mSectionsPagerAdapter.getRegisteredFragment(SectionsPagerAdapter.PAGE_RESULTS);
-                        fragment.setResult(mResult);
-                        mViewPager.setCurrentItem(SectionsPagerAdapter.PAGE_RESULTS);
+                        mSectionsPagerAdapter.updateAll();
+                        mViewPager.setCurrentItem(SectionsPagerAdapter.PAGE_TIPS);
                     }
                 });
             }
@@ -187,7 +211,8 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         public static final int PAGE_SETUP = 0;
-        public static final int PAGE_RESULTS = 1;
+        public static final int PAGE_TIPS = 1;
+        public static final int PAGE_RESULTS = 2;
 
         private SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
 
@@ -199,9 +224,11 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
         public Fragment getItem(int position) {
             switch (position) {
                 case PAGE_SETUP:
-                    return GameFragment.newInstance(mEngine.getSettings(), mEngine.getState());
+                    return GameFragment.newInstance();
                 case PAGE_RESULTS:
-                    return ResultsFragment.newInstance(mResult);
+                    return ResultsFragment.newInstance();
+                case PAGE_TIPS:
+                    return TipsFragment.newInstance();
                 default:
                     return null;
             }
@@ -209,7 +236,7 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -219,6 +246,8 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
                     return "Game setup";
                 case PAGE_RESULTS:
                     return "Results";
+                case PAGE_TIPS:
+                    return "Tips";
             }
             return null;
         }
@@ -238,6 +267,16 @@ public class MainActivity extends ActionBarActivity implements GameFragment.OnFr
 
         public Fragment getRegisteredFragment(int position) {
             return registeredFragments.get(position);
+        }
+
+        public void updateAll() {
+            for(int i = 0; i < registeredFragments.size(); i++) {
+                int key = registeredFragments.keyAt(i);
+                Updatable u = (Updatable) registeredFragments.get(key);
+                if (u != null) {
+                    u.onDataUpdated();
+                }
+            }
         }
     }
 }

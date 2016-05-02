@@ -36,4 +36,9 @@ public class BetLegWinner extends PlayerAction {
         }
         return expectation;
     }
+
+    @Override
+    public void accept(PlayerActionVisitor v) {
+        v.visit(this);
+    }
 }

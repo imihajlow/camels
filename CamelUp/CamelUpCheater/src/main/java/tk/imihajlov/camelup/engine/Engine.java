@@ -1,8 +1,11 @@
 package tk.imihajlov.camelup.engine;
 
-public class Engine {
+import java.io.IOException;
+import java.io.Serializable;
+
+public class Engine implements Serializable {
     public interface ResultListener {
-        void onCompleted(LegResult result);
+        void onCompleted();
 
         void onInterrupted();
     }
@@ -11,6 +14,8 @@ public class Engine {
         if (!settings.equals(this.settings)) {
             this.settings = settings;
             this.state = null;
+            this.resultCalculator = null;
+            this.result = null;
         }
     }
 
@@ -26,22 +31,42 @@ public class Engine {
         return state;
     }
 
+    public LegResult getResult() {
+        return result;
+    }
+
     public boolean calculate(ResultListener listener) {
         if (settings == null || state == null || listener == null) {
             return false;
         }
-        result = new Result(settings, state, listener);
-        (new Thread(result)).start();
+        resultCalculator = new ResultCalculator(settings, state, listener);
+        (new Thread(resultCalculator)).start();
         return true;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream stream)
+            throws IOException {
+        stream.writeObject(settings);
+        stream.writeObject(state);
+        stream.writeObject(result);
+    }
+
+    private void readObject(java.io.ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        settings = (Settings) stream.readObject();
+        state = (State) stream.readObject();
+        result = (LegResult) stream.readObject();
+        resultCalculator = null;
     }
 
     private Settings settings;
     private State state;
-    private Result result;
+    private ResultCalculator resultCalculator;
+    private LegResult result;
 
-    private class Result implements Runnable {
+    private class ResultCalculator implements Runnable {
 
-        public Result(Settings settings, State state, ResultListener listener) {
+        public ResultCalculator(Settings settings, State state, ResultListener listener) {
             this.settings = settings;
             this.state = state;
             this.listener = listener;
@@ -49,10 +74,11 @@ public class Engine {
 
         @Override
         public void run() {
-            result = new LegResult(settings.getNCamels(), state.getLegWinnerGains());
+            resultAccumulator = new LegResult(settings.getNCamels(), state.getLegWinnerGains());
             positions(state);
-            result.finish();
-            listener.onCompleted(result);
+            resultAccumulator.finish();
+            result = resultAccumulator;
+            listener.onCompleted();
         }
 
         private void positions(State state) {
@@ -60,9 +86,9 @@ public class Engine {
                 return;
             }
             if (state.isGameEnd()) {
-                result.addFinal(state.listCamelsByPosition());
+                resultAccumulator.addFinal(state.listCamelsByPosition());
             } else if (!state.areDiceLeft()) {
-                result.addPositions(state.listCamelsByPosition());
+                resultAccumulator.addPositions(state.listCamelsByPosition());
             } else {
                 boolean[] dice = state.getDice();
                 for (int i = 0; i < dice.length; ++i) {
@@ -87,6 +113,6 @@ public class Engine {
         private Settings settings;
         private State state;
         private ResultListener listener;
-        private LegResult result;
+        private LegResult resultAccumulator;
     }
 }

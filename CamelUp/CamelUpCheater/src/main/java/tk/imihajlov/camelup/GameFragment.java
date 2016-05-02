@@ -24,15 +24,11 @@ import tk.imihajlov.camelup.engine.CamelPosition;
 import tk.imihajlov.camelup.engine.Settings;
 import tk.imihajlov.camelup.engine.State;
 
-public class GameFragment extends Fragment {
+public class GameFragment extends Fragment implements Updatable {
 
-    private OnFragmentInteractionListener mListener;
-    private Settings mGameSettings;
-    private State mGameState;
+    private InteractionListener mListener;
     private List<EditText> mPlusMinusEdits;
     private List<CheckBox> mPlusMinusCheckboxes;
-    public static final String ARG_STATE = "state";
-    public static final String ARG_SETTINGS = "settings";
 
     public GameFragment() {
         // Required empty public constructor
@@ -46,22 +42,14 @@ public class GameFragment extends Fragment {
      *
      * @return A new instance of fragment GameFragment.
      */
-    public static GameFragment newInstance(Settings settings, State state) {
+    public static GameFragment newInstance() {
         GameFragment fragment = new GameFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ARG_STATE, state);
-        args.putSerializable(ARG_SETTINGS, settings);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mGameState = (State) getArguments().getSerializable(ARG_STATE);
-            mGameSettings = (Settings) getArguments().getSerializable(ARG_SETTINGS);
-        }
     }
 
     @Override
@@ -70,9 +58,7 @@ public class GameFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_game, container, false);
         view = updateViewWithCurrentSettings(view);
-        if (mGameState != null) {
-            view = updateViewWithState(view, mGameState);
-        }
+        view = updateViewWithState(view, mListener.getState());
         attachHandlers(view);
         ((Button) view.findViewById(R.id.buttonCalculate)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,8 +72,8 @@ public class GameFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (activity instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) activity;
+        if (activity instanceof InteractionListener) {
+            mListener = (InteractionListener) activity;
         } else {
             throw new RuntimeException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -100,18 +86,19 @@ public class GameFragment extends Fragment {
         mListener = null;
     }
 
-    public void setData(Settings settings, State state) {
-        mGameState = state;
-        mGameSettings = settings;
+    @Override
+    public void onDataUpdated() {
         updateViewWithCurrentSettings(getView());
-        updateViewWithState(getView(), mGameState);
+        updateViewWithState(getView(), mListener.getState());
     }
 
     private void parseAndCheck() {
+        if (!isResumed()) {
+            return;
+        }
         State newState = tryParseState(getView());
-        mGameState = newState;
         mListener.onGameStateUpdated(newState);
-        ((Button) getView().findViewById(R.id.buttonCalculate)).setEnabled(mGameState != null);
+        ((Button) getView().findViewById(R.id.buttonCalculate)).setEnabled(newState != null);
     }
 
     private void attachHandlers(View view) {
@@ -172,7 +159,7 @@ public class GameFragment extends Fragment {
         mPlusMinusCheckboxes.clear();
         mPlusMinusEdits.clear();
 
-        for (int i = 0; i < mGameSettings.getNPlayers(); ++i) {
+        for (int i = 0; i < mListener.getSettings().getNPlayers(); ++i) {
             EditText edit = new EditText(getActivity());
             edit.setInputType(InputType.TYPE_CLASS_NUMBER);
             edit.setMaxEms(5);
@@ -277,8 +264,8 @@ public class GameFragment extends Fragment {
         List<Integer> oasises = new ArrayList<Integer>();
 
         assert mPlusMinusEdits.size() == mPlusMinusCheckboxes.size();
-        assert mPlusMinusEdits.size() == mGameSettings.getNPlayers();
-        for (int i = 0; i < mGameSettings.getNPlayers(); ++i) {
+        assert mPlusMinusEdits.size() == mListener.getSettings().getNPlayers();
+        for (int i = 0; i < mListener.getSettings().getNPlayers(); ++i) {
             try {
                 Integer x = Integer.parseInt(mPlusMinusEdits.get(i).getText().toString()) - 1;
                 if (mPlusMinusCheckboxes.get(i).isChecked()) {
@@ -289,24 +276,8 @@ public class GameFragment extends Fragment {
             } catch (NumberFormatException e) {
             }
         }
-        return State.validateAndCreate(mGameSettings, camels, dice,
+        return State.validateAndCreate(mListener.getSettings(), camels, dice,
                 ArrayUtils.toPrimitive(mirages.toArray(new Integer[mirages.size()])),
                 ArrayUtils.toPrimitive(oasises.toArray(new Integer[oasises.size()])));
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        void onGameStateUpdated(State state);
-
-        void onCalculatePressed();
     }
 }

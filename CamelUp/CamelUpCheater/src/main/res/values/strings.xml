@@ -10,4 +10,7 @@
     <string name="camels_state">Camels state</string>
     <string name="plusminux">+1/-1</string>
     <string name="players_count">Number of players</string>
+    <string name="action">Action</string>
+    <string name="gain">Gain</string>
+    <string name="no_results">No results yet</string>
 </resources>
