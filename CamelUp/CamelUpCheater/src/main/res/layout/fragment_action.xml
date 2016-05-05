@@ -1,0 +1,120 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="tk.imihajlov.camelup.engine.ActionFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:id="@+id/radioGroup">
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Die 1"
+                android:id="@+id/radioButtonDie1"
+                android:textColor="@color/colorCamel0" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Die 2"
+                android:textColor="@color/colorCamel1"
+                android:id="@+id/radioButtonDie2" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Die 3"
+                android:textColor="@color/colorCamel2"
+                android:id="@+id/radioButtonDie3" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Die 4"
+                android:textColor="@color/colorCamel3"
+                android:id="@+id/radioButtonDie4" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Die 5"
+                android:textColor="@color/colorCamel4"
+                android:id="@+id/radioButtonDie5" />
+        </RadioGroup>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/radioGroup"
+            android:layout_alignBottom="@+id/radioGroup">
+
+            <SeekBar
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/seekBarDieValue"
+                android:max="2"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="10dp"
+                android:layout_gravity="right|top"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:id="@+id/textViewDieValue"
+                android:layout_above="@+id/seekBarDieValue"
+                android:layout_centerHorizontal="true" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/roll_dice"
+                android:id="@+id/buttonDice"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true" />
+        </RelativeLayout>
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/switchPlusOrMinus"
+            android:layout_below="@+id/radioGroup"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="39dp"
+            android:textOn="+1"
+            android:textOff="-1" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:ems="4"
+            android:id="@+id/editPlusMinusPosition"
+            android:layout_alignBottom="@+id/switchPlusOrMinus"
+            android:layout_toEndOf="@+id/switchPlusOrMinus"
+            android:layout_marginLeft="20px" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/put_mirage"
+            android:id="@+id/buttonPutPlusMinus"
+            android:layout_centerVertical="true"
+            android:layout_alignEnd="@+id/editPlusMinusPosition" />
+
+    </RelativeLayout>
+
+</FrameLayout>

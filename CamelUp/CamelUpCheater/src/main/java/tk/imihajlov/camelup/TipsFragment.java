@@ -72,7 +72,7 @@ public class TipsFragment extends Fragment implements Updatable {
     }
 
     @Override
-    public void onDataUpdated() {
+    public void onDataUpdated(Object source) {
         updateViewWithCurrentResult(getView());
     }
 

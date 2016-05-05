@@ -216,4 +216,24 @@ public class StateTest {
             assertEquals(5, n);
         }
     }
+
+    @Test
+    public void testEquals() {
+        State state1 = createState();
+        State state2 = createState();
+        assertEquals(state1, state2);
+        State state3 = State.createOnLegBegin(state1.getSettings(), new CamelPosition[] {
+                new CamelPosition(1, 0),
+                new CamelPosition(1, 1),
+                new CamelPosition(0, 0),
+                new CamelPosition(2, 0),
+                new CamelPosition(0, 1)
+        });
+        assertNotEquals(state1, state3);
+
+        State state4 = state3.putMirage(5);
+        assertNotEquals(state4, state3);
+        State state5 = state3.putMirage(5);
+        assertEquals(state4, state5);
+    }
 }

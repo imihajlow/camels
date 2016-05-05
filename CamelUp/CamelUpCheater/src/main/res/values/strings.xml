@@ -13,4 +13,7 @@
     <string name="action">Action</string>
     <string name="gain">Gain</string>
     <string name="no_results">No results yet</string>
+    <string name="roll_dice">Roll</string>
+    <string name="put_oasis">Put oasis</string>
+    <string name="put_mirage">Put mirage</string>
 </resources>

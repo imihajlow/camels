@@ -76,7 +76,7 @@ public class GameFragment extends Fragment implements Updatable {
             mListener = (InteractionListener) activity;
         } else {
             throw new RuntimeException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement InteractionListener");
         }
     }
 
@@ -87,7 +87,10 @@ public class GameFragment extends Fragment implements Updatable {
     }
 
     @Override
-    public void onDataUpdated() {
+    public void onDataUpdated(Object source) {
+        if (source == this) {
+            return;
+        }
         updateViewWithCurrentSettings(getView());
         updateViewWithState(getView(), mListener.getState());
     }
@@ -97,7 +100,9 @@ public class GameFragment extends Fragment implements Updatable {
             return;
         }
         State newState = tryParseState(getView());
-        mListener.onGameStateUpdated(newState);
+        if (newState != null && !newState.equals(mListener.getState())) {
+            mListener.onGameStateUpdated(this, newState);
+        }
         ((Button) getView().findViewById(R.id.buttonCalculate)).setEnabled(newState != null);
     }
 

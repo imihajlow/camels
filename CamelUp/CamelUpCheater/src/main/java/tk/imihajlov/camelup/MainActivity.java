@@ -14,6 +14,7 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import tk.imihajlov.camelup.engine.ActionFragment;
 import tk.imihajlov.camelup.engine.CamelPosition;
 import tk.imihajlov.camelup.engine.Engine;
 import tk.imihajlov.camelup.engine.LegResult;
@@ -107,7 +108,7 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
                 if (mEngine.getState() == null) {
                     mEngine.setState(createDefaultState(mEngine.getSettings()));
                 }
-                mSectionsPagerAdapter.updateAll();
+                mSectionsPagerAdapter.updateAll(this);
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -125,8 +126,9 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
     }
 
     @Override
-    public void onGameStateUpdated(State state) {
+    public void onGameStateUpdated(Object source, State state) {
         mEngine.setState(state);
+        mSectionsPagerAdapter.updateAll(source);
     }
 
     @Override
@@ -184,7 +186,7 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mSectionsPagerAdapter.updateAll();
+                        mSectionsPagerAdapter.updateAll(MainActivity.this);
                         mViewPager.setCurrentItem(SectionsPagerAdapter.PAGE_TIPS);
                     }
                 });
@@ -211,8 +213,9 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         public static final int PAGE_SETUP = 0;
-        public static final int PAGE_TIPS = 1;
-        public static final int PAGE_RESULTS = 2;
+        public static final int PAGE_ACTIONS = 1;
+        public static final int PAGE_TIPS = 2;
+        public static final int PAGE_RESULTS = 3;
 
         private SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
 
@@ -229,6 +232,8 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
                     return ResultsFragment.newInstance();
                 case PAGE_TIPS:
                     return TipsFragment.newInstance();
+                case PAGE_ACTIONS:
+                    return ActionFragment.newInstance();
                 default:
                     return null;
             }
@@ -236,7 +241,7 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
 
         @Override
         public int getCount() {
-            return 3;
+            return 4;
         }
 
         @Override
@@ -248,6 +253,8 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
                     return "Results";
                 case PAGE_TIPS:
                     return "Tips";
+                case PAGE_ACTIONS:
+                    return "Actions";
             }
             return null;
         }
@@ -269,12 +276,12 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
             return registeredFragments.get(position);
         }
 
-        public void updateAll() {
+        public void updateAll(Object source) {
             for(int i = 0; i < registeredFragments.size(); i++) {
                 int key = registeredFragments.keyAt(i);
                 Updatable u = (Updatable) registeredFragments.get(key);
                 if (u != null) {
-                    u.onDataUpdated();
+                    u.onDataUpdated(source);
                 }
             }
         }

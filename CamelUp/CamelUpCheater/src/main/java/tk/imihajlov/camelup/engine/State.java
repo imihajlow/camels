@@ -2,6 +2,7 @@ package tk.imihajlov.camelup.engine;
 
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +31,7 @@ public class State implements Serializable {
     private boolean[] dice;
     private CamelPosition[] camels;
     private CellState[] cells;
-    private List<Queue<Integer>> legBetCards;
+    private List<List<Integer>> legBetCards;
 
     private State(Settings settings, CamelPosition[] camels, boolean[] dice, CellState[] cells) {
         this.settings = settings;
@@ -38,14 +39,28 @@ public class State implements Serializable {
         this.camels = camels.clone();
         this.cells = cells.clone();
         this.gameEnd = false;
-        this.legBetCards = new ArrayList<Queue<Integer>>(settings.getNCamels());
+        this.legBetCards = new ArrayList<List<Integer>>(settings.getNCamels());
         for (int i = 0; i < settings.getNCamels(); ++i) {
-            Queue<Integer> q = new ArrayDeque<Integer>();
+            List<Integer> q = new ArrayList<Integer>();
             this.legBetCards.add(q);
             q.add(5);
             q.add(3);
             q.add(2);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        State s = (State) o;
+        if (s != null) {
+            return settings.equals(s.settings)
+                    && gameEnd == s.gameEnd
+                    && Arrays.equals(dice, s.dice)
+                    && Arrays.equals(camels, s.camels)
+                    && Arrays.equals(cells, s.cells)
+                    && legBetCards.equals(s.legBetCards);
+        }
+        return false;
     }
 
     /** State at the endgame.
@@ -314,8 +329,12 @@ public class State implements Serializable {
 
     public int[] getLegWinnerGains() {
         List<Integer> result = new ArrayList<Integer>();
-        for (Queue<Integer> q : legBetCards) {
-            result.add(q.peek());
+        for (List<Integer> q : legBetCards) {
+            if (q.size() > 0) {
+                result.add(q.get(0));
+            } else {
+                result.add(0);
+            }
         }
         return ArrayUtils.toPrimitive(result.toArray(new Integer[0]));
     }

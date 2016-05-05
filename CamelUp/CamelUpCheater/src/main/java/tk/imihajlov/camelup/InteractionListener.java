@@ -5,7 +5,7 @@ import tk.imihajlov.camelup.engine.Settings;
 import tk.imihajlov.camelup.engine.State;
 
 public interface InteractionListener {
-    void onGameStateUpdated(State state);
+    void onGameStateUpdated(Object source, State state);
 
     void onCalculatePressed();
 
