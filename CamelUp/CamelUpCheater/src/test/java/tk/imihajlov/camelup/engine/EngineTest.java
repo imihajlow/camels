@@ -48,7 +48,7 @@ public class EngineTest {
 
     @Test
     public void testDesertGains() {
-        final Settings s = new Settings(1);
+        final Settings s = new Settings(3);
         State state = State.validateAndCreate(s, new CamelPosition[] {
                     new CamelPosition(0, 0),
                     new CamelPosition(0, 1),

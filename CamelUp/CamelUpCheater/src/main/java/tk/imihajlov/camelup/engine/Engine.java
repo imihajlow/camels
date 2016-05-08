@@ -118,17 +118,8 @@ public class Engine implements Serializable {
                 for (int i = 0; i < dice.length; ++i) {
                     if (dice[i]) {
                         for (int v = 1; v <= settings.maxDieValue; ++v) {
-                            // Just jump
                             resultAccumulator.countDesert(state.willStepOnDesert(i, v));
                             positions(state.jump(i, v));
-                            // Or if +1 or -1 can be put, put it and jump
-                            int xTo = state.getCamelPosition(i).getX() + v;
-                            State newState = state.putMirage(xTo);
-                            if (newState != null) {
-                                positions(newState.jump(i, v));
-                                newState = state.putOasis(xTo);
-                                positions(newState.jump(i, v));
-                            }
                         }
                     }
                 }
