@@ -35,14 +35,24 @@ public class Engine implements Serializable {
         return result;
     }
 
-    public boolean calculate(ResultListener listener) {
+    public Thread getCalculatorThread(ResultListener listener) {
         if (settings == null || state == null || listener == null) {
-            return false;
+            return null;
         }
         resultCalculator = new ResultCalculator(settings, state, listener);
-        (new Thread(resultCalculator)).start();
-        return true;
+        return new Thread(resultCalculator);
     }
+
+    public boolean calculateAsync(ResultListener listener) {
+        Thread t = getCalculatorThread(listener);
+        if (t != null) {
+            t.start();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     private void writeObject(java.io.ObjectOutputStream stream)
             throws IOException {
@@ -75,10 +85,24 @@ public class Engine implements Serializable {
         @Override
         public void run() {
             resultAccumulator = new LegResult(settings.getNCamels(), state.getLegWinnerGains());
-            positions(state);
+            calculateWithDeserts();
             resultAccumulator.finish();
             result = resultAccumulator;
             listener.onCompleted();
+        }
+
+        private void calculateWithDeserts() {
+            for (int x: state.getReachableDesertPositions()) {
+                State newState = state.putMirage(x);
+                resultAccumulator.startCountingDesert(x, false);
+                positions(newState);
+                resultAccumulator.finishCountingDesert();
+                newState = state.putOasis(x);
+                resultAccumulator.startCountingDesert(x, true);
+                positions(newState);
+                resultAccumulator.finishCountingDesert();
+            }
+            positions(state);
         }
 
         private void positions(State state) {
@@ -95,6 +119,7 @@ public class Engine implements Serializable {
                     if (dice[i]) {
                         for (int v = 1; v <= settings.maxDieValue; ++v) {
                             // Just jump
+                            resultAccumulator.countDesert(state.willStepOnDesert(i, v));
                             positions(state.jump(i, v));
                             // Or if +1 or -1 can be put, put it and jump
                             int xTo = state.getCamelPosition(i).getX() + v;

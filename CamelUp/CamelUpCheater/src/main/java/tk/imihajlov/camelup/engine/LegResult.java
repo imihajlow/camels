@@ -1,12 +1,17 @@
 package tk.imihajlov.camelup.engine;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import tk.imihajlov.camelup.engine.actions.BetLegWinner;
 import tk.imihajlov.camelup.engine.actions.Dice;
+import tk.imihajlov.camelup.engine.actions.PutDesert;
 
 public class LegResult implements Serializable {
     private final int[] legWinnerGains;
@@ -15,6 +20,34 @@ public class LegResult implements Serializable {
     private double[] looses;
     private double[] absoluteWins;
     private double[] absoluteLooses;
+
+    private class Desert implements Serializable {
+        int x;
+        boolean isOasis;
+        int nHits;
+        int nResults;
+        double gain;
+        Desert(int x, boolean isOasis) {
+            this.x = x;
+            this.isOasis = isOasis;
+        }
+
+        public void finish() {
+            if (nResults != 0) {
+                gain = (double) nHits / (double) nResults;
+            }
+        }
+
+        public void hit() {
+            nHits += 1;
+        }
+
+        public void legEnded() {
+            nResults += 1;
+        }
+    }
+    private Desert myDesert;
+    private List<Desert> desertGains;
 
     private int nResults;
     private int nFinals;
@@ -51,6 +84,9 @@ public class LegResult implements Serializable {
                 actions.add(new BetLegWinner(i, legWinnerGains[i], result[i]));
             }
         }
+        for (Desert d : desertGains) {
+            actions.add(new PutDesert(d.gain, d.x, d.isOasis));
+        }
         Collections.sort(actions);
         Collections.reverse(actions);
         return actions.toArray(new PlayerAction[0]);
@@ -69,16 +105,18 @@ public class LegResult implements Serializable {
         absoluteLooses = new double[nCamels];
         nResults = 0;
         nFinals = 0;
+        myDesert = null;
+        desertGains = new ArrayList<Desert>();
     }
 
     void addPositions(int[] positions) {
-        if (nResults == 0) {
-            reset(result.length);
-        }
         for (int i = 0; i < positions.length; ++i) {
             result[positions[i]][i] += 1;
         }
         nResults += 1;
+        if (myDesert != null) {
+            myDesert.legEnded();
+        }
     }
 
     void addFinal(int[] positions) {
@@ -86,6 +124,24 @@ public class LegResult implements Serializable {
         nFinals += 1;
         wins[positions[0]] += 1;
         looses[positions[positions.length - 1]] += 1;
+    }
+
+    void startCountingDesert(int x, boolean isOasis) {
+        myDesert = new Desert(x, isOasis);
+    }
+
+    void countDesert(int x) {
+        if (myDesert != null && x == myDesert.x) {
+            myDesert.hit();
+        }
+    }
+
+    void finishCountingDesert() {
+        if (myDesert != null) {
+            myDesert.finish();
+            desertGains.add(myDesert);
+            myDesert = null;
+        }
     }
 
     void finish() {

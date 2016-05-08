@@ -311,6 +311,93 @@ public class State implements Serializable {
         return new State(settings, newCamels, dice, newCells);
     }
 
+    /**
+     * Finds out if after dicing the camel will step on a desert tile.
+     * @param camel camel number
+     * @param dieValue value on the dice (number of steps to go)
+     * @return -1 if the camel will not step on a desert or the x-coordinate of the desert tile.
+     */
+    public int willStepOnDesert(int camel, int dieValue) {
+        int xTo = camels[camel].getX() + dieValue;
+        if (xTo < settings.getNSteps()) {
+            CellState state = cells[xTo];
+            if (state == CellState.MINUS || state == CellState.PLUS) {
+                return xTo;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Get an array of positions suitable for placing desert tiles and
+     * reachable by camels in the current round.
+     * @return array of x-coordinates.
+     */
+    public int[] getReachableDesertPositions() {
+        boolean[] result = new boolean[cells.length];
+        int[] camelsOnCells = new int[cells.length];
+        int[] maxJump = new int[cells.length];
+
+        // Calculate number of active camels on each tile
+        for (CamelPosition p : camels) {
+            camelsOnCells[p.getX()] = Math.max(camelsOnCells[p.getX()], p.getY() + 1);
+        }
+        for (int i = 0; i < camels.length; ++i) {
+            if (!dice[i]) {
+                camelsOnCells[camels[i].getX()] -= 1;
+            }
+        }
+
+        // Calculate maximum possible jump from each tile
+        for (int x = 0; x < cells.length; ++x) {
+            if (x + 3 < cells.length) {
+                switch (cells[x + 3]) {
+                    case PLUS:
+                        maxJump[x] = Math.min(4, cells.length - x - 1);
+                        break;
+                    case MINUS:
+                        maxJump[x] = 2;
+                        break;
+                    default:
+                        maxJump[x] = 3;
+                        break;
+                }
+            } else {
+                maxJump[x] = cells.length - x - 1;
+            }
+        }
+
+        // n camels jump n times
+        for (int x = 0; x < camelsOnCells.length; ++x) {
+            int xFrom = x;
+            for (int n = 0; n < camelsOnCells[x]; ++n) {
+                for (int jump = 1; jump <= maxJump[xFrom]; ++jump) {
+                    result[xFrom + jump] = true;
+                }
+                xFrom = xFrom + maxJump[xFrom];
+            }
+        }
+
+        for (int x = 1; x < cells.length; ++x) {
+            if (cells[x] != CellState.EMPTY) {
+                result[x] = false;
+            }
+            if (cells[x].isPlusOrMinus()) {
+                result[x - 1] = false;
+                if (x + 1 < result.length) {
+                    result[x + 1] = false;
+                }
+            }
+        }
+        List<Integer> ps = new ArrayList<Integer>();
+        for (int x = 1; x < result.length; ++x) {
+            if (result[x]) {
+                ps.add(x);
+            }
+        }
+        return ArrayUtils.toPrimitive(ps.toArray(new Integer[0]));
+    }
+
     public CamelPosition getCamelPosition(int n) {
         return camels[n];
     }

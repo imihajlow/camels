@@ -16,6 +16,7 @@ import tk.imihajlov.camelup.engine.PlayerAction;
 import tk.imihajlov.camelup.engine.actions.BetLegWinner;
 import tk.imihajlov.camelup.engine.actions.Dice;
 import tk.imihajlov.camelup.engine.actions.PlayerActionVisitor;
+import tk.imihajlov.camelup.engine.actions.PutDesert;
 
 
 /**
@@ -101,6 +102,13 @@ public class TipsFragment extends Fragment implements Updatable {
         public void visit(BetLegWinner action) {
             TextView text = new TextView(table.getContext());
             text.setText(String.format("Bet on camel %d", action.getCamel() + 1));
+            addRow(text, action.getProfitExpectation());
+        }
+
+        @Override
+        public void visit(PutDesert action) {
+            TextView text = new TextView(table.getContext());
+            text.setText(String.format("Put %s on tile %d", action.isOasis() ? "oasis" : "mirage", action.getX() + 1));
             addRow(text, action.getProfitExpectation());
         }
 

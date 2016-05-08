@@ -149,7 +149,7 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
     @Override
     public void onCalculatePressed() {
         Log.v("CamelUp", "onCalculatePressed");
-        if (mEngine.calculate(new Engine.ResultListener() {
+        if (mEngine.calculateAsync(new Engine.ResultListener() {
             @Override
             public void onCompleted() {
                 runOnUiThread(new Runnable() {

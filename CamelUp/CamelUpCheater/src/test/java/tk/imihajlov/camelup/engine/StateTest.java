@@ -236,4 +236,44 @@ public class StateTest {
         State state5 = state3.putMirage(5);
         assertEquals(state4, state5);
     }
+
+    @Test
+    public void testReachablePositions() {
+        Settings settings = new Settings();
+        State state = State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(2,0),
+                        new CamelPosition(4,0),
+                        new CamelPosition(8,0),
+                        new CamelPosition(8,1)
+            },
+                new boolean[] { true, false, true, true, true },
+                new int[] {7},
+                new int[] {});
+        assertNotNull(state);
+        assertArrayEquals(new int[] {1,3,5,9,10,11,12,13,14}, state.getReachableDesertPositions());
+
+        // Reachable positions should allow desert tiles
+        for (int x: state.getReachableDesertPositions()) {
+            assertNotNull("Cannot put a desert tile onto a reachable position", state.putMirage(x));
+        }
+
+        state = State.validateAndCreate(settings, new CamelPosition[] {
+                        new CamelPosition(0,0),
+                        new CamelPosition(2,0),
+                        new CamelPosition(3,2),
+                        new CamelPosition(3,0),
+                        new CamelPosition(3,1)
+                },
+                new boolean[] { true, false, true, true, true },
+                new int[] {},
+                new int[] {9});
+        assertNotNull(state);
+        assertArrayEquals(new int[] {1,4,5,6,7,11,12,13}, state.getReachableDesertPositions());
+
+        // Reachable positions should allow desert tiles
+        for (int x: state.getReachableDesertPositions()) {
+            assertNotNull("Cannot put a desert tile onto a reachable position", state.putMirage(x));
+        }
+    }
 }
