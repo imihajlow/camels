@@ -1,20 +1,16 @@
 package tk.imihajlov.camelup.engine;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import tk.imihajlov.camelup.engine.actions.BetLegWinner;
 import tk.imihajlov.camelup.engine.actions.Dice;
 import tk.imihajlov.camelup.engine.actions.PutDesert;
 
 public class LegResult implements Serializable {
-    private final int[] legWinnerGains;
+    private final LegWinnerCard[] topLegWinnerCards;
     private double[][] result;
     private double[] wins;
     private double[] looses;
@@ -80,8 +76,8 @@ public class LegResult implements Serializable {
         List<PlayerAction> actions = new ArrayList<PlayerAction>();
         actions.add(new Dice());
         for (int i = 0; i < result.length; ++i) {
-            if (legWinnerGains[i] > 0) {
-                actions.add(new BetLegWinner(i, legWinnerGains[i], result[i]));
+            if (topLegWinnerCards[i] != null) {
+                actions.add(new BetLegWinner(topLegWinnerCards[i], result[i]));
             }
         }
         for (Desert d : desertGains) {
@@ -92,8 +88,8 @@ public class LegResult implements Serializable {
         return actions.toArray(new PlayerAction[0]);
     }
 
-    LegResult(int nCamels, int[] legWinnerGains) {
-        this.legWinnerGains = legWinnerGains;
+    LegResult(int nCamels, LegWinnerCard[] topLegWinnerCards) {
+        this.topLegWinnerCards = topLegWinnerCards;
         reset(nCamels);
     }
 

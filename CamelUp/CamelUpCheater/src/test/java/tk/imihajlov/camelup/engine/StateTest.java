@@ -208,16 +208,6 @@ public class StateTest {
     }
 
     @Test
-    public void testLegGains() {
-        State state = createState();
-        int[] gains = state.getLegWinnerGains();
-        assertEquals(state.getSettings().getNCamels(), gains.length);
-        for (int n: gains) {
-            assertEquals(5, n);
-        }
-    }
-
-    @Test
     public void testEquals() {
         State state1 = createState();
         State state2 = createState();

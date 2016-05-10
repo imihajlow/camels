@@ -31,7 +31,7 @@ public class State implements Serializable {
     private boolean[] dice;
     private CamelPosition[] camels;
     private CellState[] cells;
-    private List<List<Integer>> legBetCards;
+    private List<List<LegWinnerCard>> legBetCards;
 
     private State(Settings settings, CamelPosition[] camels, boolean[] dice, CellState[] cells) {
         this.settings = settings;
@@ -39,13 +39,13 @@ public class State implements Serializable {
         this.camels = camels.clone();
         this.cells = cells.clone();
         this.gameEnd = false;
-        this.legBetCards = new ArrayList<List<Integer>>(settings.getNCamels());
+        this.legBetCards = new ArrayList<List<LegWinnerCard>>(settings.getNCamels());
         for (int i = 0; i < settings.getNCamels(); ++i) {
-            List<Integer> q = new ArrayList<Integer>();
+            List<LegWinnerCard> q = new ArrayList<LegWinnerCard>();
             this.legBetCards.add(q);
-            q.add(5);
-            q.add(3);
-            q.add(2);
+            q.add(new LegWinnerCard(i, 5));
+            q.add(new LegWinnerCard(i, 3));
+            q.add(new LegWinnerCard(i, 2));
         }
     }
 
@@ -414,16 +414,16 @@ public class State implements Serializable {
         return gameEnd;
     }
 
-    public int[] getLegWinnerGains() {
-        List<Integer> result = new ArrayList<Integer>();
-        for (List<Integer> q : legBetCards) {
+    public LegWinnerCard[] getTopLegWinnerCards() {
+        List<LegWinnerCard> result = new ArrayList<LegWinnerCard>();
+        for (List<LegWinnerCard> q : legBetCards) {
             if (q.size() > 0) {
                 result.add(q.get(0));
             } else {
-                result.add(0);
+                result.add(null);
             }
         }
-        return ArrayUtils.toPrimitive(result.toArray(new Integer[0]));
+        return result.toArray(new LegWinnerCard[0]);
     }
 
     private int[] getCellStates(CellState state) {

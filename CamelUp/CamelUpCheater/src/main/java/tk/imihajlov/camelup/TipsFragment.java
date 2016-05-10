@@ -101,7 +101,7 @@ public class TipsFragment extends Fragment implements Updatable {
         @Override
         public void visit(BetLegWinner action) {
             TextView text = new TextView(table.getContext());
-            text.setText(String.format("Bet on camel %d", action.getCamel() + 1));
+            text.setText(String.format("Bet on camel %d", action.getCard().getCamel() + 1));
             addRow(text, action.getProfitExpectation());
         }
 
@@ -115,7 +115,7 @@ public class TipsFragment extends Fragment implements Updatable {
         private void addRow(View leftColumn, double gain) {
             TableRow row = new TableRow(table.getContext());
             TextView text = new TextView(table.getContext());
-            text.setText(String.format("%.1f", gain));
+            text.setText(String.format("%+.1f", gain));
             row.addView(leftColumn);
             row.addView(text);
             table.addView(row);

@@ -37,7 +37,7 @@ public class EngineTest {
         t.start();
         try {
             t.join();
-        } catch (InterruptedException _) {
+        } catch (InterruptedException exc) {
             assertTrue("Interrupted", false);
         }
         assertTrue("Should be completed", listener.isCompleted);

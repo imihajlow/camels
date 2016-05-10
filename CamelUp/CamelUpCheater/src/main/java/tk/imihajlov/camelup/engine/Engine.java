@@ -84,7 +84,7 @@ public class Engine implements Serializable {
 
         @Override
         public void run() {
-            resultAccumulator = new LegResult(settings.getNCamels(), state.getLegWinnerGains());
+            resultAccumulator = new LegResult(settings.getNCamels(), state.getTopLegWinnerCards());
             calculateWithDeserts();
             resultAccumulator.finish();
             result = resultAccumulator;
