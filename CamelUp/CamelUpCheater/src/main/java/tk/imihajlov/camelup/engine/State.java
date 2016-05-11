@@ -1,6 +1,8 @@
 package tk.imihajlov.camelup.engine;
 
 
+import com.google.common.collect.ImmutableList;
+
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayDeque;
@@ -32,6 +34,7 @@ public class State implements Serializable {
     private CamelPosition[] camels;
     private CellState[] cells;
     private List<List<LegWinnerCard>> legBetCards;
+    private List<Player> players;
 
     private State(Settings settings, CamelPosition[] camels, boolean[] dice, CellState[] cells) {
         this.settings = settings;
@@ -41,12 +44,29 @@ public class State implements Serializable {
         this.gameEnd = false;
         this.legBetCards = new ArrayList<List<LegWinnerCard>>(settings.getNCamels());
         for (int i = 0; i < settings.getNCamels(); ++i) {
-            List<LegWinnerCard> q = new ArrayList<LegWinnerCard>();
+            List<LegWinnerCard> q = new ArrayList<LegWinnerCard>(3);
             this.legBetCards.add(q);
             q.add(new LegWinnerCard(i, 5));
             q.add(new LegWinnerCard(i, 3));
             q.add(new LegWinnerCard(i, 2));
         }
+        players = new ArrayList<Player>(settings.getNPlayers());
+        for (int i = 0; i < settings.getNPlayers(); ++i) {
+            players.add(new Player(i));
+        }
+    }
+
+    private State(State other) {
+        settings = other.settings;
+        dice = other.dice.clone();
+        camels = other.camels.clone();
+        cells = other.cells.clone();
+        gameEnd = other.gameEnd;
+        legBetCards = new ArrayList<List<LegWinnerCard>>(settings.getNCamels());
+        for (List<LegWinnerCard> l : other.legBetCards) {
+            legBetCards.add(new ArrayList<LegWinnerCard>(l));
+        }
+        players = new ArrayList<Player>(other.players);
     }
 
     @Override
@@ -160,6 +180,10 @@ public class State implements Serializable {
 
     public Settings getSettings() {
         return settings;
+    }
+
+    public ImmutableList<Player> getPlayers() {
+        return ImmutableList.copyOf(players);
     }
 
     public boolean areDiceLeft() {
@@ -309,6 +333,22 @@ public class State implements Serializable {
             }
         }
         return new State(settings, newCamels, dice, newCells);
+    }
+
+    public State betOnLegWinner(int player, int camel) {
+        if (player < 0 || player >= settings.getNPlayers()
+                || camel < 0 || camel >= settings.getNCamels()) {
+            return null;
+        }
+        State result = new State(this);
+
+        List<LegWinnerCard> cards = result.legBetCards.get(camel);
+        if (cards.size() == 0) {
+            return null;
+        }
+        LegWinnerCard card = cards.remove(0);
+        result.players.set(player, result.players.get(player).takeLegWinnerCard(card));
+        return result;
     }
 
     /**

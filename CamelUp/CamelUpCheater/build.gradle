@@ -26,6 +26,7 @@ dependencies {
     compile 'com.android.support:support-v4:19.1.0'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.github.PhilJay:MPAndroidChart:v2.0.9'
+    compile 'com.google.guava:guava:19.0'
 }
 
 

@@ -21,6 +21,10 @@ public class LegWinnerCard {
         return result;
     }
 
+    public double getExpectedGain(double[][] probabilityMatrix) {
+        return getExpectedGain(probabilityMatrix[camel]);
+    }
+
     public int getCamel() {
         return camel;
     }

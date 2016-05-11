@@ -1,5 +1,7 @@
 package tk.imihajlov.camelup.engine;
 
+import com.google.common.collect.ImmutableList;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -265,5 +267,39 @@ public class StateTest {
         for (int x: state.getReachableDesertPositions()) {
             assertNotNull("Cannot put a desert tile onto a reachable position", state.putMirage(x));
         }
+    }
+
+    @Test
+    public void testBetOnLegWinner() {
+        State state = createState();
+        assertNotNull(state);
+        State state1 = state.betOnLegWinner(1, 2);
+        assertNotNull(state1);
+        assertArrayEquals(new LegWinnerCard[] {
+                        new LegWinnerCard(0,5),
+                        new LegWinnerCard(1,5),
+                        new LegWinnerCard(2,3),
+                        new LegWinnerCard(3,5),
+                        new LegWinnerCard(4,5)
+                }, state1.getTopLegWinnerCards()
+        );
+        assertEquals(ImmutableList.<LegWinnerCard>of(new LegWinnerCard(2,5)), state1.getPlayers().get(1).getLegWinnerCards());
+        State state2 = state1.betOnLegWinner(2, 2);
+        assertNotNull(state2);
+        assertEquals(ImmutableList.<LegWinnerCard>of(new LegWinnerCard(2,5)), state2.getPlayers().get(1).getLegWinnerCards());
+        assertEquals(ImmutableList.<LegWinnerCard>of(new LegWinnerCard(2,3)), state2.getPlayers().get(2).getLegWinnerCards());
+        assertEquals(new LegWinnerCard(2,2), state2.getTopLegWinnerCards()[2]);
+        State state3 = state2.betOnLegWinner(2, 2);
+        assertNotNull(state3);
+        assertNull(state3.getTopLegWinnerCards()[2]);
+        assertNull(state3.betOnLegWinner(2, 2));
+        assertArrayEquals(new LegWinnerCard[] {
+                        new LegWinnerCard(0,5),
+                        new LegWinnerCard(1,5),
+                        new LegWinnerCard(2,5),
+                        new LegWinnerCard(3,5),
+                        new LegWinnerCard(4,5)
+                }, state.getTopLegWinnerCards()
+        );
     }
 }
