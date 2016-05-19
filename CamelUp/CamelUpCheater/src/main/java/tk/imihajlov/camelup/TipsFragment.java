@@ -126,7 +126,7 @@ public class TipsFragment extends Fragment implements Updatable {
         if (mListener == null) {
             return;
         }
-        if (mListener.getResult() == null) {
+        if (mListener.getActionsSuggester() == null) {
             view.findViewById(R.id.textViewNoResults).setVisibility(View.VISIBLE);
             view.findViewById(R.id.tableTips).setVisibility(View.GONE);
         } else {
@@ -135,7 +135,7 @@ public class TipsFragment extends Fragment implements Updatable {
             TableLayout table = (TableLayout) view.findViewById(R.id.tableTips);
             table.removeViews(1, table.getChildCount() - 1);
             TableBuilder builder = new TableBuilder(table);
-            for (PlayerAction action : mListener.getResult().getSuggestedActions()) {
+            for (PlayerAction action : mListener.getActionsSuggester().getSuggestedActions()) {
                 action.accept(builder);
             }
         }

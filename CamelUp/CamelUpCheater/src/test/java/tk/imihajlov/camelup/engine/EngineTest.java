@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 
 public class EngineTest {
 
-    private LegResult calculateResult(Settings s, State state) {
+    private Engine calculateResult(Settings s, State state) {
         Engine e = new Engine();
         e.setSettings(s);
         e.setState(state);
@@ -42,8 +42,9 @@ public class EngineTest {
         }
         assertTrue("Should be completed", listener.isCompleted);
         assertFalse("Should not be interrupted", listener.isInterrupted);
-        assertNotNull(e.getResult());
-        return e.getResult();
+        assertNotNull(e.getActionsSuggester());
+        assertNotNull(e.getPositionsSuggester());
+        return e;
     }
 
     @Test
@@ -59,7 +60,7 @@ public class EngineTest {
                 new boolean[] { false, false, false, false, true },
                 new int[] {},
                 new int[] {});
-        LegResult result = calculateResult(s, state);
+        Engine e = calculateResult(s, state);
 
         class ActionChecker implements PlayerActionVisitor {
             public int desertTipsCount = 0;
@@ -85,7 +86,7 @@ public class EngineTest {
         }
 
         ActionChecker checker = new ActionChecker();
-        for (PlayerAction action : result.getSuggestedActions()) {
+        for (PlayerAction action : e.getActionsSuggester().getSuggestedActions()) {
             action.accept(checker);
         }
         assertEquals("Invalid number of suggested desert tips", state.getReachableDesertPositions().length * 2, checker.desertTipsCount);

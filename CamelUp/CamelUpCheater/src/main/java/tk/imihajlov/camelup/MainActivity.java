@@ -20,6 +20,9 @@ import tk.imihajlov.camelup.engine.Engine;
 import tk.imihajlov.camelup.engine.LegResult;
 import tk.imihajlov.camelup.engine.Settings;
 import tk.imihajlov.camelup.engine.State;
+import tk.imihajlov.camelup.engine.suggesters.ISuggester;
+import tk.imihajlov.camelup.engine.suggesters.PositionsSuggester;
+
 import android.util.Log;
 import android.view.ViewGroup;
 
@@ -142,8 +145,13 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
     }
 
     @Override
-    public LegResult getResult() {
-        return mEngine.getResult();
+    public ISuggester getActionsSuggester() {
+        return mEngine.getActionsSuggester();
+    }
+
+    @Override
+    public PositionsSuggester getPositionsSuggester() {
+        return mEngine.getPositionsSuggester();
     }
 
     @Override
@@ -160,10 +168,10 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
                     }
                 });
 
-                LegResult result = mEngine.getResult();
-                Log.v("CamelUp", "ResultCalculator has been received: ");
+                PositionsSuggester ps = mEngine.getPositionsSuggester();
+                Log.v("CamelUp", "PositionsSuggester has been received: ");
                 StringBuilder sb = new StringBuilder();
-                for (double[] row : result.getProbabilityMatrix()) {
+                for (double[] row : ps.getProbabilityMatrix()) {
                     for (double x : row) {
                         sb.append(String.format("%.3f,", x));
                     }
@@ -172,13 +180,13 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
                 Log.v("CamelUp", sb.toString());
                 sb = new StringBuilder();
                 sb.append("Winners: ");
-                for (double x : result.getWinProbability()) {
+                for (double x : ps.getWinProbability()) {
                     sb.append(String.format("%.3f, ", x));
                 }
                 Log.v("CamelUp", sb.toString());
                 sb = new StringBuilder();
                 sb.append("Loosers: ");
-                for (double x : result.getLooseProbability()) {
+                for (double x : ps.getLooseProbability()) {
                     sb.append(String.format("%.3f, ", x));
                 }
                 Log.v("CamelUp", sb.toString());

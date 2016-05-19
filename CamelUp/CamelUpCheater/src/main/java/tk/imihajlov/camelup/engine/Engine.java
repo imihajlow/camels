@@ -3,6 +3,12 @@ package tk.imihajlov.camelup.engine;
 import java.io.IOException;
 import java.io.Serializable;
 
+import tk.imihajlov.camelup.engine.suggesters.CompositeSuggester;
+import tk.imihajlov.camelup.engine.suggesters.DesertSuggester;
+import tk.imihajlov.camelup.engine.suggesters.DiceSuggester;
+import tk.imihajlov.camelup.engine.suggesters.ISuggester;
+import tk.imihajlov.camelup.engine.suggesters.PositionsSuggester;
+
 public class Engine implements Serializable {
     public interface ResultListener {
         void onCompleted();
@@ -15,7 +21,8 @@ public class Engine implements Serializable {
             this.settings = settings;
             this.state = null;
             this.resultCalculator = null;
-            this.result = null;
+            this.totalSuggester = null;
+            this.positionsSuggester = null;
         }
     }
 
@@ -31,8 +38,12 @@ public class Engine implements Serializable {
         return state;
     }
 
-    public LegResult getResult() {
-        return result;
+    public ISuggester getActionsSuggester() {
+        return totalSuggester;
+    }
+
+    public PositionsSuggester getPositionsSuggester() {
+        return positionsSuggester;
     }
 
     public Thread getCalculatorThread(ResultListener listener) {
@@ -58,21 +69,24 @@ public class Engine implements Serializable {
             throws IOException {
         stream.writeObject(settings);
         stream.writeObject(state);
-        stream.writeObject(result);
+        stream.writeObject(totalSuggester);
+        stream.writeObject(positionsSuggester);
     }
 
     private void readObject(java.io.ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
         settings = (Settings) stream.readObject();
         state = (State) stream.readObject();
-        result = (LegResult) stream.readObject();
+        totalSuggester = (CompositeSuggester) stream.readObject();
+        positionsSuggester = (PositionsSuggester) stream.readObject();
         resultCalculator = null;
     }
 
     private Settings settings;
     private State state;
     private ResultCalculator resultCalculator;
-    private LegResult result;
+    private CompositeSuggester totalSuggester;
+    private PositionsSuggester positionsSuggester;
 
     private class ResultCalculator implements Runnable {
 
@@ -84,42 +98,55 @@ public class Engine implements Serializable {
 
         @Override
         public void run() {
-            resultAccumulator = new LegResult(settings.getNCamels(), state.getTopLegWinnerCards());
-            calculateWithDeserts();
-            resultAccumulator.finish();
-            result = resultAccumulator;
+            positionsSuggester = new PositionsSuggester(settings.getNCamels(), state.getTopLegWinnerCards());
+            totalSuggester = new CompositeSuggester(positionsSuggester, new DiceSuggester());
+            positions(state, positionsSuggester, null);
+            positionsSuggester.finish();
+
+            for (int x: state.getReachableDesertPositions()) {
+                DesertSuggester desertSuggester = new DesertSuggester(x, false);
+                State newState = state.putMirage(x);
+                positions(newState, null, desertSuggester);
+                totalSuggester.add(desertSuggester);
+
+                desertSuggester = new DesertSuggester(x, true);
+                newState = state.putOasis(x);
+                positions(newState, null, desertSuggester);
+                totalSuggester.add(desertSuggester);
+            }
+
+            Engine.this.positionsSuggester = positionsSuggester;
+            Engine.this.totalSuggester = totalSuggester;
             listener.onCompleted();
         }
 
-        private void calculateWithDeserts() {
-            for (int x: state.getReachableDesertPositions()) {
-                State newState = state.putMirage(x);
-                resultAccumulator.startCountingDesert(x, false);
-                positions(newState);
-                resultAccumulator.finishCountingDesert();
-                newState = state.putOasis(x);
-                resultAccumulator.startCountingDesert(x, true);
-                positions(newState);
-                resultAccumulator.finishCountingDesert();
-            }
-            positions(state);
-        }
-
-        private void positions(State state) {
+        private void positions(State state, PositionsSuggester positionsSuggester, DesertSuggester desertSuggester) {
             if (state == null) {
                 return;
             }
             if (state.isGameEnd()) {
-                resultAccumulator.addFinal(state.listCamelsByPosition());
+                if (positionsSuggester != null) {
+                    positionsSuggester.addFinal(state.listCamelsByPosition());
+                }
+                if (desertSuggester != null) {
+                    desertSuggester.legEnded();
+                }
             } else if (!state.areDiceLeft()) {
-                resultAccumulator.addPositions(state.listCamelsByPosition());
+                if (positionsSuggester != null) {
+                    positionsSuggester.addPositions(state.listCamelsByPosition());
+                }
+                if (desertSuggester != null) {
+                    desertSuggester.legEnded();
+                }
             } else {
                 boolean[] dice = state.getDice();
                 for (int i = 0; i < dice.length; ++i) {
                     if (dice[i]) {
                         for (int v = 1; v <= settings.maxDieValue; ++v) {
-                            resultAccumulator.countDesert(state.willStepOnDesert(i, v));
-                            positions(state.jump(i, v));
+                            if (desertSuggester != null) {
+                                desertSuggester.countDesert(state.willStepOnDesert(i, v));
+                            }
+                            positions(state.jump(i, v), positionsSuggester, desertSuggester);
                         }
                     }
                 }
@@ -129,6 +156,7 @@ public class Engine implements Serializable {
         private Settings settings;
         private State state;
         private ResultListener listener;
-        private LegResult resultAccumulator;
+        private CompositeSuggester totalSuggester;
+        private PositionsSuggester positionsSuggester;
     }
 }

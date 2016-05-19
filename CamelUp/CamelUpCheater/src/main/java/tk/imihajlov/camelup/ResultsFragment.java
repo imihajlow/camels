@@ -86,7 +86,7 @@ public class ResultsFragment extends Fragment implements Updatable {
         if (mListener == null) {
             return;
         }
-        if (mListener.getResult() == null) {
+        if (mListener.getPositionsSuggester() == null) {
             view.findViewById(R.id.textViewNoResults).setVisibility(View.VISIBLE);
             view.findViewById(R.id.chartResults).setVisibility(View.GONE);
             view.invalidate();
@@ -113,7 +113,7 @@ public class ResultsFragment extends Fragment implements Updatable {
                     R.color.colorCamel3,
                     R.color.colorCamel4
             };
-            double[][] matrix = mListener.getResult().getProbabilityMatrix();
+            double[][] matrix = mListener.getPositionsSuggester().getProbabilityMatrix();
             assert matrix.length == 5;
             for (int i = 0; i < matrix.length; ++i) {
                 List<BarEntry> valueSet = new ArrayList<BarEntry>();
