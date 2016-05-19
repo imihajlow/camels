@@ -2,11 +2,9 @@ package tk.imihajlov.camelup.engine;
 
 import org.junit.Test;
 
-import java.io.InterruptedIOException;
-
 import tk.imihajlov.camelup.engine.actions.BetLegWinner;
 import tk.imihajlov.camelup.engine.actions.Dice;
-import tk.imihajlov.camelup.engine.actions.PlayerActionVisitor;
+import tk.imihajlov.camelup.engine.actions.IPlayerActionVisitor;
 import tk.imihajlov.camelup.engine.actions.PutDesert;
 
 import static org.junit.Assert.*;
@@ -17,7 +15,7 @@ public class EngineTest {
         Engine e = new Engine();
         e.setSettings(s);
         e.setState(state);
-        class Listener implements Engine.ResultListener {
+        class Listener implements Engine.IResultListener {
             public boolean isCompleted = false;
             public boolean isInterrupted = false;
 
@@ -62,7 +60,7 @@ public class EngineTest {
                 new int[] {});
         Engine e = calculateResult(s, state);
 
-        class ActionChecker implements PlayerActionVisitor {
+        class ActionChecker implements IPlayerActionVisitor {
             public int desertTipsCount = 0;
 
             public void visit(BetLegWinner action) {

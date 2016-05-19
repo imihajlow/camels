@@ -1,7 +1,7 @@
 package tk.imihajlov.camelup.engine;
 
 
-import tk.imihajlov.camelup.engine.actions.PlayerActionVisitor;
+import tk.imihajlov.camelup.engine.actions.IPlayerActionVisitor;
 
 public abstract class PlayerAction implements Comparable<PlayerAction> {
     final private double profitExpectation;
@@ -18,5 +18,5 @@ public abstract class PlayerAction implements Comparable<PlayerAction> {
         return (int) Math.signum(profitExpectation - other.profitExpectation);
     }
 
-    public abstract void accept(PlayerActionVisitor visitor);
+    public abstract void accept(IPlayerActionVisitor visitor);
 }

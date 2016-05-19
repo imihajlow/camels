@@ -11,11 +11,10 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import tk.imihajlov.camelup.engine.LegResult;
 import tk.imihajlov.camelup.engine.PlayerAction;
 import tk.imihajlov.camelup.engine.actions.BetLegWinner;
 import tk.imihajlov.camelup.engine.actions.Dice;
-import tk.imihajlov.camelup.engine.actions.PlayerActionVisitor;
+import tk.imihajlov.camelup.engine.actions.IPlayerActionVisitor;
 import tk.imihajlov.camelup.engine.actions.PutDesert;
 
 
@@ -24,8 +23,8 @@ import tk.imihajlov.camelup.engine.actions.PutDesert;
  * Use the {@link TipsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TipsFragment extends Fragment implements Updatable {
-    private InteractionListener mListener;
+public class TipsFragment extends Fragment implements IUpdatable {
+    private IInteractionListener mListener;
 
     public TipsFragment() {
         // Required empty public constructor
@@ -58,8 +57,8 @@ public class TipsFragment extends Fragment implements Updatable {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (activity instanceof InteractionListener) {
-            mListener = (InteractionListener) activity;
+        if (activity instanceof IInteractionListener) {
+            mListener = (IInteractionListener) activity;
         } else {
             throw new RuntimeException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -77,7 +76,7 @@ public class TipsFragment extends Fragment implements Updatable {
         updateViewWithCurrentResult(getView());
     }
 
-    private class TableBuilder implements PlayerActionVisitor {
+    private class TableBuilder implements IPlayerActionVisitor {
         private TableLayout table;
         private final int[] colors = new int[] {
                 R.color.colorCamel0,

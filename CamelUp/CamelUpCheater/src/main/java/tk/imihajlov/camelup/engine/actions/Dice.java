@@ -8,7 +8,7 @@ public class Dice extends PlayerAction {
     }
 
     @Override
-    public void accept(PlayerActionVisitor v) {
+    public void accept(IPlayerActionVisitor v) {
         v.visit(this);
     }
 }

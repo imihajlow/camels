@@ -13,7 +13,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.TableRow;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -21,12 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tk.imihajlov.camelup.engine.CamelPosition;
-import tk.imihajlov.camelup.engine.Settings;
 import tk.imihajlov.camelup.engine.State;
 
-public class GameFragment extends Fragment implements Updatable {
+public class GameFragment extends Fragment implements IUpdatable {
 
-    private InteractionListener mListener;
+    private IInteractionListener mListener;
     private List<EditText> mPlusMinusEdits;
     private List<CheckBox> mPlusMinusCheckboxes;
 
@@ -72,11 +70,11 @@ public class GameFragment extends Fragment implements Updatable {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (activity instanceof InteractionListener) {
-            mListener = (InteractionListener) activity;
+        if (activity instanceof IInteractionListener) {
+            mListener = (IInteractionListener) activity;
         } else {
             throw new RuntimeException(activity.toString()
-                    + " must implement InteractionListener");
+                    + " must implement IInteractionListener");
         }
     }
 

@@ -1,17 +1,13 @@
 package tk.imihajlov.camelup;
 
 import android.app.Activity;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -19,17 +15,14 @@ import com.github.mikephil.charting.data.BarEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-import tk.imihajlov.camelup.engine.LegResult;
-import tk.imihajlov.camelup.engine.State;
-
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link ResultsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ResultsFragment extends Fragment implements Updatable {
-    private InteractionListener mListener;
+public class ResultsFragment extends Fragment implements IUpdatable {
+    private IInteractionListener mListener;
 
     public ResultsFragment() {
         // Required empty public constructor
@@ -63,8 +56,8 @@ public class ResultsFragment extends Fragment implements Updatable {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (activity instanceof InteractionListener) {
-            mListener = (InteractionListener) activity;
+        if (activity instanceof IInteractionListener) {
+            mListener = (IInteractionListener) activity;
         } else {
             throw new RuntimeException(activity.toString()
                     + " must implement OnFragmentInteractionListener");

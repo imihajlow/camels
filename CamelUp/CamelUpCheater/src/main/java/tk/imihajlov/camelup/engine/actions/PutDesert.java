@@ -21,7 +21,7 @@ public class PutDesert extends PlayerAction {
     }
 
     @Override
-    public void accept(PlayerActionVisitor visitor) {
+    public void accept(IPlayerActionVisitor visitor) {
         visitor.visit(this);
     }
 }

@@ -10,7 +10,7 @@ import tk.imihajlov.camelup.engine.suggesters.ISuggester;
 import tk.imihajlov.camelup.engine.suggesters.PositionsSuggester;
 
 public class Engine implements Serializable {
-    public interface ResultListener {
+    public interface IResultListener {
         void onCompleted();
 
         void onInterrupted();
@@ -46,7 +46,7 @@ public class Engine implements Serializable {
         return positionsSuggester;
     }
 
-    public Thread getCalculatorThread(ResultListener listener) {
+    public Thread getCalculatorThread(IResultListener listener) {
         if (settings == null || state == null || listener == null) {
             return null;
         }
@@ -54,7 +54,7 @@ public class Engine implements Serializable {
         return new Thread(resultCalculator);
     }
 
-    public boolean calculateAsync(ResultListener listener) {
+    public boolean calculateAsync(IResultListener listener) {
         Thread t = getCalculatorThread(listener);
         if (t != null) {
             t.start();
@@ -90,7 +90,7 @@ public class Engine implements Serializable {
 
     private class ResultCalculator implements Runnable {
 
-        public ResultCalculator(Settings settings, State state, ResultListener listener) {
+        public ResultCalculator(Settings settings, State state, IResultListener listener) {
             this.settings = settings;
             this.state = state;
             this.listener = listener;
@@ -155,7 +155,7 @@ public class Engine implements Serializable {
 
         private Settings settings;
         private State state;
-        private ResultListener listener;
+        private IResultListener listener;
         private CompositeSuggester totalSuggester;
         private PositionsSuggester positionsSuggester;
     }

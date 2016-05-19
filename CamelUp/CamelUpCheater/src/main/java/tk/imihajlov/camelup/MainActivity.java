@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import tk.imihajlov.camelup.engine.ActionFragment;
 import tk.imihajlov.camelup.engine.CamelPosition;
 import tk.imihajlov.camelup.engine.Engine;
-import tk.imihajlov.camelup.engine.LegResult;
 import tk.imihajlov.camelup.engine.Settings;
 import tk.imihajlov.camelup.engine.State;
 import tk.imihajlov.camelup.engine.suggesters.ISuggester;
@@ -26,7 +25,7 @@ import tk.imihajlov.camelup.engine.suggesters.PositionsSuggester;
 import android.util.Log;
 import android.view.ViewGroup;
 
-public class MainActivity extends ActionBarActivity implements InteractionListener {
+public class MainActivity extends ActionBarActivity implements IInteractionListener {
 
     private static final int SETTINGS_REQUEST = 1;
 
@@ -157,7 +156,7 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
     @Override
     public void onCalculatePressed() {
         Log.v("CamelUp", "onCalculatePressed");
-        if (mEngine.calculateAsync(new Engine.ResultListener() {
+        if (mEngine.calculateAsync(new Engine.IResultListener() {
             @Override
             public void onCompleted() {
                 runOnUiThread(new Runnable() {
@@ -287,7 +286,7 @@ public class MainActivity extends ActionBarActivity implements InteractionListen
         public void updateAll(Object source) {
             for(int i = 0; i < registeredFragments.size(); i++) {
                 int key = registeredFragments.keyAt(i);
-                Updatable u = (Updatable) registeredFragments.get(key);
+                IUpdatable u = (IUpdatable) registeredFragments.get(key);
                 if (u != null) {
                     u.onDataUpdated(source);
                 }

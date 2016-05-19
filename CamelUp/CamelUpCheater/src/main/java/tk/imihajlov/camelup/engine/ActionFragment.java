@@ -17,12 +17,12 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import tk.imihajlov.camelup.InteractionListener;
+import tk.imihajlov.camelup.IInteractionListener;
 import tk.imihajlov.camelup.R;
-import tk.imihajlov.camelup.Updatable;
+import tk.imihajlov.camelup.IUpdatable;
 
-public class ActionFragment extends Fragment implements Updatable {
-    private InteractionListener mListener;
+public class ActionFragment extends Fragment implements IUpdatable {
+    private IInteractionListener mListener;
     private RadioButton[] mDiceButtons;
     private State mStateDice;
     private State mStatePlusMinus;
@@ -76,11 +76,11 @@ public class ActionFragment extends Fragment implements Updatable {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (activity instanceof InteractionListener) {
-            mListener = (InteractionListener) activity;
+        if (activity instanceof IInteractionListener) {
+            mListener = (IInteractionListener) activity;
         } else {
             throw new RuntimeException(activity.toString()
-                    + " must implement InteractionListener");
+                    + " must implement IInteractionListener");
         }
     }
 

@@ -1,5 +1,5 @@
 package tk.imihajlov.camelup;
 
-public interface Updatable {
+public interface IUpdatable {
     void onDataUpdated(Object source);
 }

@@ -3,6 +3,8 @@ package tk.imihajlov.camelup.engine;
 
 import com.google.common.collect.ImmutableList;
 
+import tk.imihajlov.camelup.engine.suggesters.PositionsSuggester;
+
 public class Player {
     public static final int MYSELF = 0;
 
@@ -34,9 +36,9 @@ public class Player {
         return new Player(this.id, newCards);
     }
 
-    public double getGain(LegResult legResult) {
+    public double getGain(PositionsSuggester positionsSuggester) {
         double gain = 0;
-        double[][] matrix = legResult.getProbabilityMatrix();
+        double[][] matrix = positionsSuggester.getProbabilityMatrix();
         for (LegWinnerCard card : legWinnerCards) {
             gain += card.getExpectedGain(matrix);
         }
